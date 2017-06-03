@@ -72,6 +72,7 @@ PRODUCT_PACKAGES += \
     mali.ko \
     ump.ko \
     egl.cfg \
+    gralloc.amlogic \
     hwcomposer.amlogic
 
 # Player

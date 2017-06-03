@@ -70,23 +70,35 @@ PRODUCT_PACKAGES += com.google.widevine.software.drm.xml \
 	libwvm \
 	libwvdrm_L3 \
 	libotzapi \
-	libwvsecureos_api
+	libwvsecureos_api \
+	libdrmdecrypt \
+	libwvdrmengine \
+	liboemcrypto \
+	widevine
 
 endif
 
 #########################################################################
 #
-#                                                flash player
+#                                                PlayReady drm
 #
 #########################################################################
-ifeq ($(BUILD_WITH_FLASH_PLAYER),true)
+ifeq ($(BUILD_WITH_PLAYREADY_DRM),true)
 
-PRODUCT_PACKAGES += \
-  oem_install_flash_player_jb_mr1.apk \
-  libflashplayer.so \
-  libysshared.so
+PRODUCT_PACKAGES += libdrmplayreadyplugin \
+	libsmoothstreaming_test \
+	libsmoothstreaming \
+	libprwmv \
+	playready
+
+PRODUCT_COPY_FILES += \
+    vendor/playready/playreadyplugin/keycert/zgpriv.dat:system/etc/drm/playready/zgpriv.dat \
+    vendor/playready/playreadyplugin/keycert/bgroupcert.dat:system/etc/drm/playready/bgroupcert.dat \
+    vendor/playready/playreadyplugin/keycert/devcerttemplate.dat:system/etc/drm/playready/devcerttemplate.dat \
+    vendor/playready/playreadyplugin/keycert/priv.dat:system/etc/drm/playready/priv.dat
 
 endif
+
 
 #########################################################################
 #
@@ -125,9 +137,43 @@ endif
 ifeq ($(BUILD_WITH_MIRACAST),true)
 
 PRODUCT_PACKAGES += \
-	MiracastSink
+	Miracast \
+	libstagefright_hdcp \
+	libstagefright_hdcpkey
 
 PRODUCT_COPY_FILES += \
-	device/amlogic/common/miracast/libwfd_jni.so:system/lib/libwfd_jni.so
-	
+	device/amlogic/common/miracast/srm.bin:system/etc/hdcp/srm.bin 
+endif
+
+#########################################################################
+#
+#                                                Xiaocong
+#
+#########################################################################
+ifeq ($(BUILD_WITH_XIAOCONG),true)
+
+PRODUCT_PACKAGES += \
+        XCgamecenter.apk \
+        libEventJNI4.so \
+        xcuts.idc \
+        xcmid-amlogic
+
+endif
+
+#########################################################################
+#
+#                                                Thirdpart APKs
+#
+#########################################################################
+ifeq ($(BUILD_WITH_THIRDPART_APK),true)
+
+PRODUCT_PACKAGES += \
+	preinstall.sh \
+  $(patsubst vendor/amlogic/prebuilt/preinstallation/%,%,$(wildcard vendor/amlogic/prebuilt/preinstallation/*.apk))
+endif
+
+ifeq ($(BUILD_WITH_BAIDU_APK),true)
+PRODUCT_PACKAGES += \
+	baidu_preinstall.sh \
+  $(patsubst vendor/amlogic/prebuilt/baidu_preinstall_apk/%,%,$(wildcard vendor/amlogic/prebuilt/baidu_preinstall_apk/*.apk))
 endif

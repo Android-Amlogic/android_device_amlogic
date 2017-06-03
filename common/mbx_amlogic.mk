@@ -72,6 +72,7 @@ PRODUCT_PACKAGES += \
     mali.ko \
     ump.ko \
     egl.cfg \
+    gralloc.amlogic \
     hwcomposer.amlogic
 
 # Player
@@ -164,6 +165,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
 	$(TARGET_PRODUCT_DIR)/set_display_mode.sh:system/bin/set_display_mode.sh 
 
+#copy zram_mount.sh
+PRODUCT_COPY_FILES += \
+	$(TARGET_PRODUCT_DIR)/zram_mount.sh:system/bin/zram_mount.sh 
+	
 ifneq ($(wildcard frameworks/base/Android.mk),)
 PRODUCT_COPY_FILES += \
 	packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml

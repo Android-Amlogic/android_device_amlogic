@@ -17,24 +17,22 @@
 PRODUCT_PACKAGES += \
     audio_policy.default \
     audio.primary.amlogic \
+    audio.hdmi.amlogic \
     acoustics.default \
     audio_firmware
 
-ifdef DOLBY_UDC_MULTICHANNEL
-PRODUCT_PACKAGES += \
-		audio.hdmi6.amlogic
-endif
 
 PRODUCT_COPY_FILES += \
-  $(TARGET_PRODUCT_DIR)/audio_policy.conf:system/etc/audio_policy.conf \
-	$(TARGET_PRODUCT_DIR)/audio_effects.conf:system/etc/audio_effects.conf
+    $(TARGET_PRODUCT_DIR)/audio_policy.conf:system/etc/audio_policy.conf \
+    $(TARGET_PRODUCT_DIR)/audio_effects.conf:system/etc/audio_effects.conf
 
 #arm audio decoder lib
-#PRODUCT_COPY_FILES += \
-#	device/amlogic/common/acodec_lib/libape.so:system/lib/libape.so	\
-#	device/amlogic/common/acodec_lib/libfaad.so:system/lib/libfaad.so	\
-#	device/amlogic/common/acodec_lib/libflac.so:system/lib/libflac.so
-PRODUCT_COPY_FILES += $(TOP)/packages/amlogic/LibPlayer/amadec/acodec_lib/*:system/lib/
+soft_adec_libs := $(shell ls packages/amlogic/LibPlayer/amadec/acodec_lib)
+PRODUCT_COPY_FILES += $(foreach file, $(soft_adec_libs), \
+        packages/amlogic/LibPlayer/amadec/acodec_lib/$(file):system/lib/$(file))
+        
+#audio data ko 
+PRODUCT_COPY_FILES += device/amlogic/common/audio/audio_data.ko:system/lib/audio_data.ko        
 
 ################################################################################## alsa
 
@@ -84,6 +82,11 @@ else
             hardware/amlogic/audio/rt5631_mixer_paths.xml:system/etc/mixer_paths.xml
     endif
 
+    ifeq ($(BOARD_AUDIO_CODEC),rt5616)
+        PRODUCT_COPY_FILES += \
+            hardware/amlogic/audio/rt5616_mixer_paths.xml:system/etc/mixer_paths.xml
+    endif 
+
     ifeq ($(BOARD_AUDIO_CODEC),wm8960)
         PRODUCT_COPY_FILES += \
             hardware/amlogic/audio/wm8960_mixer_paths.xml:system/etc/mixer_paths.xml
@@ -92,5 +95,15 @@ else
     ifeq ($(BOARD_AUDIO_CODEC),dummy)
         PRODUCT_COPY_FILES += \
             hardware/amlogic/audio/dummy_mixer_paths.xml:system/etc/mixer_paths.xml
+    endif
+
+    ifeq ($(BOARD_AUDIO_CODEC),m8_codec)
+        PRODUCT_COPY_FILES += \
+            hardware/amlogic/audio/m8codec_mixer_paths.xml:system/etc/mixer_paths.xml
+    endif
+    
+    ifeq ($(BOARD_AUDIO_CODEC),amlpmu3)
+        PRODUCT_COPY_FILES += \
+            hardware/amlogic/audio/amlpmu3_mixer_paths.xml:system/etc/mixer_paths.xml
     endif
 endif

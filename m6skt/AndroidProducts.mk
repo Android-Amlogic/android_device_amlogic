@@ -17,7 +17,7 @@
 #
 # This file should set PRODUCT_MAKEFILES to a list of product makefiles
 # to expose to the build system.  LOCAL_DIR will already be set to
-# the directory containing this file.
+# the directory containing this file. 
 #
 # This file may not rely on the value of any variable other than
 # LOCAL_DIR; do not use any conditionals, and do not look up the
@@ -25,6 +25,5 @@
 # it includes.
 #
 
-
 PRODUCT_MAKEFILES := \
-	$(LOCAL_DIR)/m6skt.mk \
+	$(LOCAL_DIR)/m6skt.mk

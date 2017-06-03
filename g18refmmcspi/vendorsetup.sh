@@ -1,3 +1,0 @@
-add_lunch_combo g18refmmcspi-eng
-add_lunch_combo g18refmmcspi-user
-add_lunch_combo g18refmmcspi-userdebug

@@ -1,3 +1,0 @@
-add_lunch_combo g33refNew-eng
-add_lunch_combo g33refNew-user
-add_lunch_combo g33refNew-userdebug

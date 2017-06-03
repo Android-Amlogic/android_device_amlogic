@@ -1,3 +1,0 @@
-add_lunch_combo g24ref10n-eng
-add_lunch_combo g24ref10n-user
-add_lunch_combo g24ref10n-userdebug

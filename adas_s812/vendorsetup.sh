@@ -1,3 +1,0 @@
-add_lunch_combo adas_s812-eng
-add_lunch_combo adas_s812-user
-add_lunch_combo adas_s812-userdebug

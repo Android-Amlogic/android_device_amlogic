@@ -17,18 +17,17 @@
 # Product-specific compile-time definitions.
 #
 
+
 # Check Logo Size
 
 BOARD_TVMODE_ALL_SCALE := true
-TARGET_CPU_ABI2 := armeabi
 # Camera
 USE_CAMERA_STUB := false
 BOARD_HAVE_FRONT_CAM := false
 BOARD_HAVE_BACK_CAM := false
 BOARD_USE_USB_CAMERA := true
+IS_CAM_NONBLOCK := true
 BOARD_HAVE_FLASHLIGHT := false
-
-
 
 BOARD_VOUT_USES_FREESCALE := false
 ##################################################### CPU
@@ -37,6 +36,7 @@ TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_SMP := true
+TARGET_CPU_VARIANT := cortex-a9
 
 ##################################################### release package
 TARGET_BOOTLOADER_BOARD_NAME := g35
@@ -60,11 +60,18 @@ TARGET_BUILD_WIPE_USERDATA := false
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1073741824
 BOARD_FLASH_BLOCK_SIZE := 2048
-TARGET_ENABLE_SCALE_FUNCTION := true
-
+#TARGET_ENABLE_SCALE_FUNCTION := true
+TARGET_HAS_HDMIONLY_FUNCTION := true
 
 USE_OPENGL_RENDERER := true
 
+#GPU
+USING_MALI450:=false
+USING_ION:=true
+
+#SENSOR
+BOARD_SENSOR_AMLOGIC:=true
+BOARD_SENSOR_KIONIX_61G:=false
 #PRODUCT_EXTRA_RECOVERY_KEYS := ../common/releasekey.x509.pem
 
-
+include device/amlogic/common/sepolicy.mk

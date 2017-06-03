@@ -4,9 +4,8 @@ import init.amlogic.board.rc
 on early-init
     mount debugfs debugfs /sys/kernel/debug
     mount usbfs none /proc/bus/usb
-
-    insmod /boot/ump.ko ump_debug_level=2
     insmod /boot/mali.ko mali_debug_level=2
+    insmod /boot/aml_nftl_dev.ko
 
 on init
     mkdir /mnt/shell/emulated 0700 shell shell
@@ -23,7 +22,7 @@ on init
     symlink /mnt/shell/emulated/0 /storage/emulated/legacy
 
     mkdir /storage/external_storage 0666 system system
-    mount tmpfs tmpfs /storage/external_storage rec mode=0775,gid=1000
+    mount tmpfs tmpfs /storage/external_storage rec mode=0775,uid=1000,gid=1023
 
 on post-fs-data
     mkdir /data/misc/wifi 0770 wifi wifi
@@ -41,62 +40,11 @@ on post-fs-data
     # Set indication (checked by vold) that we have finished this action
     setprop vold.post_fs_data_done 1
 
-
-
 on boot
 
 # Default Read Ahead value for sdcards
     write /sys/block/mmcblk0/queue/read_ahead_kb 2048
     write /sys/block/mmcblk1/queue/read_ahead_kb 2048
-
-  # Tsync
-    chown system system /sys/class/tsync/pts_video
-    chown system system /sys/class/tsync/pts_audio
-    chown system system /sys/class/tsync/pts_pcrscr
-    chown system system /sys/class/tsync/event
-    chown system system /sys/class/tsync/enable
-    chown system system /sys/class/tsync/av_threshold_min
-    chown system system /sys/class/tsync/av_threshold_max
-    chmod 0777 /sys/class/tsync/pts_video
-    chmod 0777 /sys/class/tsync/pts_audio
-    chmod 0777 /sys/class/tsync/pts_pcrscr
-    chmod 0777 /sys/class/tsync/event
-    chmod 0777 /sys/class/tsync/enable
-    chmod 0777 /sys/class/tsync/av_threshold_min
-    chmod 0777 /sys/class/tsync/av_threshold_max
-
-	# Audio
-    chmod 0777 /sys/class/amaudio/audio_channels_mask
-    chmod 0777 /sys/class/amaudio/enable_resample
-    chmod 0777 /sys/class/amaudio/resample_type
-
-	# DVB
-    chmod 0777 /dev/dvb0.frontend0
-    chmod 0777 /dev/dvb0.demux0
-    chmod 0777 /dev/dvb0.demux1
-    chmod 0777 /dev/dvb0.demux2
-    chmod 0777 /dev/dvb0.dvr0
-    chmod 0777 /dev/dvb0.dvr1
-    chmod 0777 /dev/dvb0.dvr2
-    chmod 0777 /sys/class/stb/demux0_source
-    chmod 0777 /sys/class/stb/demux1_source
-    chmod 0777 /sys/class/stb/demux2_source
-    chmod 0777 /sys/class/stb/source
-    chmod 0777 /sys/class/stb/asyncfifo0_source
-    chmod 0777 /sys/class/stb/asyncfifo1_source
-    chmod 0777 /sys/class/stb/asyncfifo0_flush_size
-    chmod 0777 /sys/class/stb/asyncfifo1_flush_size
-    chmod 0777 /sys/class/stb/video_pts
-    chmod 0777 /sys/class/stb/audio_pts
-    chmod 0777 dev/tvafe0
-           
-	# Misc   
-    chmod 0777 /sys/module/amvdec_h264/parameters/dec_control
-    chmod 0777 /sys/module/amvdec_mpeg12/parameters/dec_control
-    chmod 0777 /sys/module/di/parameters/bypass_hd
-    chmod 0777 /sys/module/di/parameters/bypass_all
-    chmod 0777 /sys/module/amvideo/parameters/smooth_sync_enable
-    chmod 0777 /sys/module/amvdec_h264/parameters/error_recovery_mode
 
 
     chown media system /sys/class/tsync/pts_video
@@ -107,10 +55,14 @@ on boot
     chown media system /sys/class/tsync/enable
     chown media system /sys/class/tsync/av_threshold_min
     chown media system /sys/class/tsync/av_threshold_max
-    chown media system /sys/class/graphics/fb0/blank
+    chown system system /sys/class/graphics/fb0/blank
     chown media system /sys/class/graphics/fb1/blank
+    chown media system /sys/class/graphics/fb0/order
+    chown media system /sys/class/graphics/fb1/order
     chown media system /sys/class/graphics/fb0/enable_key
     chown media system /sys/class/graphics/fb0/enable_key_onhold
+    chown media system /sys/module/amlvideodri/parameters/freerun_mode    
+    chown media system /sys/module/ionvideo/parameters/freerun_mode
     chmod 0664 /sys/class/tsync/pts_video
     chmod 0664 /sys/class/tsync/pts_audio
     chmod 0664 /sys/class/tsync/pts_pcrscr
@@ -120,7 +72,9 @@ on boot
     chmod 0664 /sys/class/tsync/av_threshold_max
     chmod 0664 /sys/class/tsync/enable
     chmod 0664 /sys/class/graphics/fb0/blank
+    chmod 0664 /sys/class/graphics/fb0/order
     chmod 0664 /sys/class/graphics/fb1/blank
+    chmod 0664 /sys/class/graphics/fb1/order
     chmod 0664 /sys/class/graphics/fb0/enable_key
     chmod 0664 /sys/class/graphics/fb0/enable_key_onhold
 
@@ -130,7 +84,8 @@ on boot
     chown media system /sys/class/video/disable_video
     chown media system /sys/class/video/zoom
     chown media system /sys/class/ppmgr/angle
-    chown media system /sys/class/ppmgr/ppscaler
+    chown media system /sys/class/ppmgr/disp
+    chown system system /sys/class/ppmgr/ppscaler
     chown media system /sys/class/ppmgr/ppscaler_rect
     chown media system /sys/class/ppmgr/vtarget
     chmod 0664 /sys/class/video/blackout_policy
@@ -139,10 +94,29 @@ on boot
     chmod 0664 /sys/class/video/disable_video
     chmod 0664 /sys/class/video/zoom
     chmod 0664 /sys/class/ppmgr/angle
+    chmod 0664 /sys/class/ppmgr/disp
     chmod 0664 /sys/class/ppmgr/ppscaler
     chmod 0664 /sys/class/ppmgr/ppscaler_rect
     chmod 0664 /sys/class/ppmgr/vtarget
 
+    chown media system /sys/class/amaudio/audio_channels_mask
+    chown media system /sys/class/amaudio/enable_resample
+    chown media system /sys/class/amaudio/resample_type
+    chmod 0664 /sys/class/amaudio/audio_channels_mask
+    chmod 0664 /sys/class/amaudio/enable_resample
+    chmod 0664 /sys/class/amaudio/resample_type
+
+    chown system system /sys/class/audiodsp/digital_raw
+    chmod 0664 /sys/class/audiodsp/digital_raw
+    chmod 0644 /sys/class/audiodsp/ac3_drc_control
+    chown system system /sys/class/audiodsp/ac3_drc_control
+    chmod 0666  /dev/audiodsp_pcmenc
+    chmod 0666  /dev/audio_spdif
+
+    #chmod 0666 /dev/amstream_sub_read
+    chmod 0666 /dev/ilitek_ctrl
+
+    chmod 0660 /dev/wifi_power
 
     chown system system /sys/class/subtitle/enable
     chown system system /sys/class/subtitle/total
@@ -156,6 +130,9 @@ on boot
     chown system system /sys/class/subtitle/fps
     chown system system /sys/class/subtitle/subtype
     chown media system /sys/class/audiodsp/codec_fatal_err
+    chown media system /sys/class/subtitle/index
+    chown media system /sys/class/audiodsp/digital_codec
+
     chmod 0664 /sys/class/audiodsp/codec_fatal_err
     chmod 0664 /sys/class/subtitle/enable
     chmod 0664 /sys/class/subtitle/total
@@ -168,6 +145,12 @@ on boot
     chmod 0664 /sys/class/subtitle/startpts
     chmod 0664 /sys/class/subtitle/fps
     chmod 0664 /sys/class/subtitle/subtype
+    chmod 0664 /sys/class/subtitle/index
+    chmod 0664 /sys/class/audiodsp/codec_fatal_err
+    chmod 0664 /sys/class/audiodsp/digital_codec
+    
+    insmod  /system/lib/audio_data.ko
+    
 
     # HDMI/LCD switch
     chown system system /sys/class/display/mode
@@ -177,12 +160,17 @@ on boot
     chown system system /sys/class/graphics/fb0/scale_axis
     chown system system /sys/class/graphics/fb1/scale_axis
     chown system system /sys/class/amhdmitx/amhdmitx0/disp_mode
+    chown system system /sys/class/amhdmitx/amhdmitx0/cec_config
+    chown system system /sys/class/amhdmitx/amhdmitx0/cec_lang_config
+    chown system system /sys/class/amhdmitx/amhdmitx0/config
     chmod 0664 /sys/class/display/mode
     chmod 0664 /sys/class/display/axis
     chmod 0664 /sys/class/graphics/fb0/scale
     chmod 0664 /sys/class/graphics/fb1/scale
     chmod 0664 /sys/class/amhdmitx/amhdmitx0/disp_mode
-
+    chmod 0664 /sys/class/amhdmitx/amhdmitx0/cec_config
+    chmod 0664 /sys/class/amhdmitx/amhdmitx0/cec_lang_config
+    chmod 0664 /sys/class/amhdmitx/amhdmitx0/config
     chown media system /sys/class/graphics/fb0/block_mode
     chmod 0664 /sys/class/graphics/fb0/block_mode
 
@@ -215,23 +203,30 @@ on boot
     chown system system /sys/class/graphics/fb0/free_scale
     chown system system /sys/class/graphics/fb0/scale_width
     chown system system /sys/class/graphics/fb0/scale_height
+    chown system system /sys/class/graphics/fb0/free_scale_axis
     chown system system /sys/class/graphics/fb1/free_scale
     chown system system /sys/class/graphics/fb1/scale_width
     chown system system /sys/class/graphics/fb1/scale_height
     chown media system /sys/class/graphics/fb0/request2XScale
+    chown system system /sys/class/graphics/fb0/freescale_mode
+    chown system system /sys/class/graphics/fb0/free_scale_axis
+    chown system system /sys/class/graphics/fb0/window_axis
     chmod 0664 /sys/class/graphics/fb0/free_scale
     chmod 0664 /sys/class/graphics/fb0/scale_width
     chmod 0664 /sys/class/graphics/fb0/scale_height
+    chmod 0664 /sys/class/graphics/fb0/free_scale_axis
     chmod 0664 /sys/class/graphics/fb1/free_scale
     chmod 0664 /sys/class/graphics/fb1/scale_width
     chmod 0664 /sys/class/graphics/fb1/scale_height
     chmod 0664 /sys/class/graphics/fb0/request2XScale
 
-    # Backlight control
-    chmod 0664 /sys/class/backlight/aml-bl/brightness
-    chown system system /sys/class/backlight/aml-bl/brightness
+    chown system system /sys/class/graphics/fb0/freescale_mode
+    chown system system /sys/class/graphics/fb0/window_axis
+    chmod 0664 /sys/class/graphics/fb0/freescale_mode
+    chmod 0664 /sys/class/graphics/fb0/window_axis
 
     # CPU scaling
+    chown system system /sys/class/thermal/thermal_zone1/mode
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -247,6 +242,7 @@ on boot
     chown system system /sys/class/freq_limit/limit
     chown system system /sys/devices/system/cpu/cpu1/online
 
+    chmod 664 /sys/class/thermal/thermal_zone1/mode
     chmod 664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chmod 664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     chmod 664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -261,7 +257,6 @@ on boot
     chmod 664 /sys/class/freq_limit/limit
     chmod 664 /sys/devices/system/cpu/cpu1/online
 
-
     chown system system /sys/devices/system/clocksource/clocksource0/current_clocksource
     # usbpm
     chown system system /sys/devices/lm0/peri_power
@@ -272,24 +267,31 @@ on boot
     chown system system /sys/class/aml_mod/mod_off
     chown system system /sys/class/aml_mod/mod_on
 
-    start sdcard
-    mkdir /data/media/0/external_storage 0000 system system
+    # hdcp2
+    write /sys/class/aml_keys/aml_keys/version auto3
+    chown media root /sys/class/aml_keys/aml_keys/hdcp
+    write /proc/sys/net/ipv4/tcp_max_syn_backlog 2048
 
+    mkdir /data/misc/hdcp 0770 media media
+    chown media root /sys/devices/platform/crypto_device/status
+    chown media root /sys/devices/platform/crypto_device/algname
+    chown media root /sys/devices/platform/crypto_device/keysize
+    chown media root /sys/devices/platform/crypto_device/keyaddr
+    chown media root /sys/devices/platform/crypto_device/srcaddr
+    chown media root /sys/devices/platform/crypto_device/dstaddr
+    chown media root /sys/devices/platform/crypto_device/size
+    chown media root /sys/devices/platform/crypto_device/dir
+
+    chown media system /sys/class/mpgpu/scale_mode
+    chmod 664 /sys/class/mpgpu/scale_mode
+    chown system system /sys/class/mpgpu/mpgpucmd
+    chmod 664 /sys/class/mpgpu/mpgpucmd
+
+    start sdcard
 
 service display /system/bin/set_display_mode.sh panel
     class core
     oneshot
-
-service dbcpy /system/bin/db.sh
-    class core
-    user root
-    group system
-    oneshot
-    
-service tvd /system/bin/tvserver
-    class first
-    user root
-    group system audio
 
 service remotecfg /system/bin/remotecfg /system/etc/remote.conf
     class core
@@ -307,7 +309,7 @@ on property:sys.mousemode=0
 on property:sys.mousemode=1
     start mousecfg
     stop remotecfg
-    
+
 service dhcpcd_wlan0 /system/bin/dhcpcd -d -f /system/etc/dhcpcd/dhcpcd.conf -ABKL
     class main
     group dhcp system
@@ -329,7 +331,7 @@ service dhcpcd_bnep0 /system/bin/dhcpcd -ABKL
     class main
     disabled
     oneshot
-    
+
 service iprenew_wlan0 /system/bin/dhcpcd -n
     class main
     disabled
@@ -349,23 +351,35 @@ service iprenew_eth0 /system/bin/dhcpcd -n
     disabled
     oneshot
 
+service smbd /system/bin/smbd
+    class main
+    group system system
+    oneshot
+
 service pppd_gprs /system/bin/init-pppd.sh
-  user root
-  group radio net_admin cache inet misc system
-  disabled
-  oneshot 
+    user root
+    group radio net_admin cache inet misc system
+    disabled
+    oneshot
 
 # virtual sdcard daemon running as media_rw (1023)
-service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
+service sdcard /system/bin/sdcard -u 1023 -g 1023 -l /data/media /mnt/shell/emulated
     class late_start
-  
+
 service sys_write_daemon /system/bin/system_key_server
-    socket sys_write stream 666 root system 
-    user root 
+    socket sys_write stream 666 root system
+    user root
     group root
     disabled
     class core
     oneshot
 
-service smbd /system/bin/smbd
-    class main
+service dig /system/bin/dig
+    class core
+    oneshot
+
+service qbd /system/bin/qbd
+    class core
+    disabled
+    oneshot
+

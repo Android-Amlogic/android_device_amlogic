@@ -20,13 +20,20 @@ PRODUCT_NAME := core_amlogic
 
 USE_OPENGL_RENDERER := true
 
-# set libplayer modules as defaults
-WITH_LIBPLAYER_MODULE := true
+ifneq ($(wildcard packages/amlogic/LibPlayer),)
+    WITH_LIBPLAYER_MODULE := true
+else
+    WITH_LIBPLAYER_MODULE := false
+endif
+
+# set soft stagefright extractor&decoder as defaults
+WITH_SOFT_AM_EXTRACTOR_DECODER := true
 
 # The OpenGL ES API level that is natively supported by this device.
 # This is a 16.16 fixed point number
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.opengles.version=131072
+    ro.opengles.version=131072 \
+    debug.hwui.render_dirty_regions=false
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.config.notification_sound=OnTheHunt.ogg \
@@ -37,22 +44,28 @@ PRODUCT_PACKAGES := \
     BackupRestoreConfirmation \
     BasicDreams \
     Browser \
+    Contacts \
+    DocumentsUI \
     DefaultContainerService \
     DownloadProvider \
     DownloadProviderUi \
     HTMLViewer \
     Home \
+    ExternalStorageProvider \
     KeyChain \
     MediaProvider \
     PackageInstaller \
     PhotoTable \
     PicoTts \
     SettingsProvider \
+    PacProcessor \
+    ProxyHandler \
     SharedStorageBackup \
     TelephonyProvider \
     UserDictionaryProvider \
     VpnDialogs \
     abcc \
+    Shell \
     apache-xml \
     atrace \
     bouncycastle \
@@ -126,12 +139,19 @@ PRODUCT_PACKAGES := \
     libstagefright_soft_mpeg4enc \
     libstagefright_soft_vorbisdec \
     libstagefright_soft_vpxdec \
+    libstagefright_soft_vpxenc \
     libstagefright_soft_rawdec \
     libstagefright_soft_adpcmdec \
     libstagefright_soft_adifdec \
     libstagefright_soft_latmdec \
     libstagefright_soft_adtsdec \
     libstagefright_soft_alacdec \
+    libstagefright_soft_dtshd \
+    libdts_bc_enc \
+    libdtsdec     \
+    libstagefright_soft_apedec   \
+    audio.r_submix.default \
+    screen_source.amlogic \
     libvariablespeed \
     libwebrtc_audio_preprocessing \
     libstagefright_soft_wmaprodec \
@@ -147,20 +167,29 @@ PRODUCT_PACKAGES := \
     uiautomator \
     telephony-common \
     mms-common \
+    voip-common \
     zoneinfo.dat \
     zoneinfo.idx \
     zoneinfo.version \
     rild \
     libsrec_jni \
     system_key_server \
-    libape \
-    libfaad \
-    libflac \
-    libmad \
     libcurl \
     curl \
-    libamadec_omx_api
-
+    libamadec_omx_api  \
+    libamadec_wfd_out  \
+    libaac_helix   \
+    libadpcm \
+    libamr \
+    libape \
+    libcook \
+    libdtsenc \
+    libfaad \
+    libflac \
+    libmad  \
+    libpcm  \
+    libpcm_wfd \
+    libraac 
 
 ifdef DOLBY_DAP
     PRODUCT_PACKAGES += \
@@ -191,8 +220,36 @@ PRODUCT_PACKAGES += \
     librtmp \
     libmms_mod \
     libcurl_mod \
-    libvhls_mod
+    libvhls_mod \
+    libdash_mod
 endif 
+
+ifeq ($(WITH_SOFT_AM_EXTRACTOR_DECODER),true)
+PRODUCT_PACKAGES += \
+    libamffmpegadapter \
+    libamffmpeg \
+    libstagefright_soft_amsoftdec \
+    libopenHEVC \
+    libstagefright_soft_amh265dec
+endif 
+
+PRODUCT_PACKAGES += \
+    libstagefrighthw \
+    libthreadworker_alt \
+    libOmxVideo \
+    libOmxCore \
+    libOmxClock \
+    libOmxBase \
+    libOmxAudio \
+    libomx_worker_peer_alt \
+    libomx_timed_task_queue_alt \
+    libomx_framework_alt \
+    libomx_clock_utils_alt \
+    libomx_av_core_alt \
+    libfpscalculator_alt \
+    libdatachunkqueue_alt
+
+PRODUCT_PACKAGES += keystore.amlogic
 
 PRODUCT_COPY_FILES += \
     system/core/rootdir/init.usb.rc:root/init.usb.rc \
@@ -228,6 +285,8 @@ ifeq ($(WITH_HOST_DALVIK),true)
         zoneinfo-host.version
 endif
 
+ADDITIONAL_BUILD_PROPERTIES += ds1.audio.multichannel.support=false
+
 ifeq ($(HAVE_SELINUX),true)
     PRODUCT_PACKAGES += \
         sepolicy \
@@ -235,6 +294,33 @@ ifeq ($(HAVE_SELINUX),true)
         seapp_contexts \
         property_contexts \
         mac_permissions.xml
+endif
+
+## set ds1 support properity##
+ifeq ($(AMLOGIC_DS_EFFECT),true)
+ADDITIONAL_BUILD_PROPERTIES += ds1.audio.effect.support=true
+else
+ADDITIONAL_BUILD_PROPERTIES += ds1.audio.effect.support=false
+endif
+
+#for usb_burning_v2
+ifeq ($(TARGET_SUPPORT_USB_BURNING_V2),true)
+PRODUCT_COPY_FILES += \
+    $(TARGET_PRODUCT_DIR)/ddr_init.bin:$(PRODUCT_OUT)/ddr_init.bin \
+    $(TARGET_PRODUCT_DIR)/u-boot-comp.bin:$(PRODUCT_OUT)/u-boot-comp.bin \
+    $(TARGET_PRODUCT_DIR)/aml_sdc_burn.ini:$(PRODUCT_OUT)/aml_sdc_burn.ini \
+
+  ifeq ($(TARGET_USE_SECURITY_MODE),true)
+    PRODUCT_COPY_FILES += \
+      $(TARGET_PRODUCT_DIR)/platform_enc.conf:$(PRODUCT_OUT)/platform_enc.conf 
+  else
+    PRODUCT_COPY_FILES += \
+      $(TARGET_PRODUCT_DIR)/platform.conf:$(PRODUCT_OUT)/platform.conf 
+  endif
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    ubootenv.var.firstboot=2
+
 endif
 
 ifeq ($(WITH_LMBENCH),true)
@@ -254,3 +340,6 @@ endif
 
 #$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
 $(call inherit-product, device/amlogic/common/base.mk)
+
+$(foreach ccf,$(CAM_CONFIG_FILES), \
+        $(eval PRODUCT_COPY_FILES += $(LOCAL_PATH)/camera_isp_configs/$(ccf):/system/etc/camera_isp_cfg/$(ccf)))

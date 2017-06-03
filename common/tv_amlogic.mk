@@ -23,11 +23,9 @@ PRODUCT_PACKAGES := \
     libdrmframework_jni \
     libfwdlockengine \
     OpenWnn \
-    PinyinIME \
     libWnnEngDic \
     libWnnJpnDic \
     libwnndict \
-    VideoEditor \
     Contacts \
     ContactsProvider \
     WAPPushManager
@@ -74,8 +72,8 @@ PRODUCT_PACKAGES += \
     mali.ko \
     ump.ko \
     egl.cfg \
-    hwcomposer.amlogic \
-    libskia.so
+    gralloc.amlogic \
+    hwcomposer.amlogic
 
 # Player
 PRODUCT_PACKAGES += \
@@ -104,6 +102,10 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
 	frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml
+
+#cp kl file for adc keyboard
+PRODUCT_COPY_FILES += \
+	$(TARGET_PRODUCT_DIR)/Vendor_0001_Product_0001.kl:/system/usr/keylayout/Vendor_0001_Product_0001.kl
 
 #copy set_display_mode.sh
 PRODUCT_COPY_FILES += \

@@ -18,74 +18,46 @@
 PRODUCT_PACKAGES += \
     20-dns.conf \
     95-configured \
-    adb \
-    adbd \
     am \
     android.policy \
     android.test.runner \
     app_process \
     applypatch \
     bmgr \
-    bootanimation \
     bugreport \
     content \
-    dbus-daemon \
-    debuggerd \
     dhcpcd \
     dhcpcd-run-hooks \
     dnsmasq \
-    dumpstate \
-    dumpsys \
     framework \
     fsck_msdos \
-    gralloc.default \
-    gzip \
+    libfbcnf \
     ime \
-    init \
-    input \
     javax.obex \
-    libEGL \
-    libETC1 \
-    libFFTEm \
-    libGLES_android \
-    libGLESv1_CM \
-    libGLESv2 \
     libSR_AudioIn \
     libandroid \
     libandroid_runtime \
     libandroid_servers \
     libaudioeffect_jni \
     libaudioflinger \
-    libbinder \
     libbundlewrapper \
-    libc \
     libcamera_client \
     libcameraservice \
-    libchromium_net \
-    libctest \
-    libcutils \
-    libdbus \
     libdl \
-    libdrm1 \
-    libdrm1_jni \
+    libeffectproxy \
     libeffects \
-    libgui \
-    libhardware \
-    libhardware_legacy \
+    libinput \
     libiprouteutil \
     libjni_latinime \
     libjnigraphics \
-    libjpeg \
-    liblog \
-    libm \
+    libldnhncr \
     libmedia \
     libmedia_jni \
     libmediaplayerservice \
     libmtp \
     libnetlink \
     libnetutils \
-    libpixelflinger \
-    libpower \
+    libpac \
     libreference-ril \
     libreverbwrapper \
     libril \
@@ -102,24 +74,13 @@ PRODUCT_PACKAGES += \
     libstagefright_foundation \
     libstagefright_omx \
     libstagefright_yuv \
-    libstdc++ \
-    libstlport \
-    libsurfaceflinger \
-    libsurfaceflinger_client \
-    libsurfaceflinger_ddmconnection \
-    libsystem_server \
-    libsysutils \
-    libthread_db \
-    libui \
     libusbhost \
     libutils \
     libvisualizer \
     libvorbisidec \
-    libwebcore \
     libwpa_client \
-    linker \
-    logcat \
-    logwrapper \
+    media \
+    media_cmd \
     mediaserver \
     monkey \
     mtpd \
@@ -127,6 +88,7 @@ PRODUCT_PACKAGES += \
     netcfg \
     netd \
     ping \
+    ping6 \
     platform.xml \
     pppd \
     pm \
@@ -135,15 +97,20 @@ PRODUCT_PACKAGES += \
     schedtest \
     screenshot \
     sdcard \
-    service \
-    servicemanager \
     services \
     settings \
-    surfaceflinger \
     svc \
-    system_server \
     tc \
-    toolbox \
     vdc \
-    vold
+    vold \
+    dig \
+    webview \
+    wm \
+    qbd
 
+
+$(call inherit-product, $(SRC_TARGET_DIR)/product/embedded.mk)
+
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_minimal.mk)
+# Override the PRODUCT_BOOT_JARS set in core_minimal.mk
+PRODUCT_BOOT_JARS := core:conscrypt:okhttp:core-junit:bouncycastle:ext:framework:framework2:telephony-common:voip-common:mms-common:android.policy:services:apache-xml:webviewchromium

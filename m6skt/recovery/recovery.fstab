@@ -1,10 +1,11 @@
-# mount point	fstype		device			device2
-/bootloader	mtd		bootloader
-/logo		mtd		logo
-/aml_logo	mtd		aml_logo
-/recovery	mtd		recovery
-/boot		mtd		boot
-/system		ext4		/dev/block/system
-/cache		ext4		/dev/block/cache
-/data		ext4		/dev/block/data
-/sdcard		vfat		/dev/block/mmcblk0p#	/dev/block/cardblksd#
+#device    mountpoint    fstype    options    flags?    (fstab    version    2)
+bootloader  /bootloader mtd    defaults    defaults
+logo        /logo       mtd    defaults    defaults
+aml_logo    /aml_logo   mtd    defaults    defaults
+recovery    /recovery   mtd    defaults    defaults
+boot        /boot       mtd    defaults    defaults
+/dev/block/system       /system ext4    defaults    defaults
+/dev/block/cache        /cache  ext4    defaults    defaults
+/dev/block/data         /data   ext4    defaults    defaults
+/dev/block/mmcblk0p1   /sdcard    vfat    defaults    defaults
+/dev/block/sda1#        /udisk     auto    defaults    defaults

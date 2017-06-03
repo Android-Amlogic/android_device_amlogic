@@ -20,17 +20,27 @@
 #
 
 # Inherit from those products. Most specific first.
-$(call inherit-product, device/amlogic/common/mid_amlogic.mk)
+$(call inherit-product-if-exists, vendor/google/products/gms.mk)
+$(call inherit-product, device/amlogic/common/mbx_amlogic.mk)
 #$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
+
+# Replace definitions used by tablet in mid_amlogic.mk above
+# Overrides
+PRODUCT_BRAND := MBX
+PRODUCT_DEVICE := Android Reference Device
+PRODUCT_NAME := Android Reference Design
+PRODUCT_CHARACTERISTICS := mbx
 
 include frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk
 
 # Discard inherited values and use our own instead.
 PRODUCT_NAME := m6skt
-PRODUCT_MANUFACTURER := MID
+PRODUCT_MANUFACTURER := MBX
 PRODUCT_DEVICE := m6skt
-PRODUCT_MODEL := AML-MX SKT
-PRODUCT_CHARACTERISTICS := tablet,nosdcard
+PRODUCT_MODEL := MBX socket board (m6skt)
+# PRODUCT_CHARACTERISTICS := tablet,nosdcard
+
+BOARD_USES_AML_SENSOR_HAL := false
 
 #########################################################################
 #
@@ -40,7 +50,13 @@ PRODUCT_CHARACTERISTICS := tablet,nosdcard
 
 #possible options: 1 tiny 2 legacy
 BOARD_ALSA_AUDIO := tiny
-BOARD_AUDIO_CODEC := rt5631
+BOARD_AUDIO_CODEC := dummy
+BOARD_USE_USB_AUDIO := true
+
+ifneq ($(strip $(wildcard $(LOCAL_PATH)/mixer_paths.xml)),)
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/mixer_paths.xml:system/etc/mixer_paths.xml
+endif
 
 include device/amlogic/common/audio.mk
 
@@ -65,7 +81,8 @@ BOARD_USES_USB_PM := true
 #
 #########################################################################
 
-WIFI_MODULE := bcm40183
+#WIFI_MODULE := rtl8192cu
+WIFI_MODULE := rtl8188eu
 include device/amlogic/common/wifi.mk
 
 # Change this to match target country
@@ -73,15 +90,6 @@ include device/amlogic/common/wifi.mk
 PRODUCT_DEFAULT_WIFI_CHANNELS := 11
 
 
-#########################################################################
-#
-#                                                Bluetooth
-#
-#########################################################################
-BOARD_HAVE_BLUETOOTH := true
-BLUETOOTH_MODULE := bcm40183
-
-include device/amlogic/common/bluetooth.mk
 
 #########################################################################
 #
@@ -92,44 +100,6 @@ include device/amlogic/common/bluetooth.mk
 GPS_MODULE :=
 include device/amlogic/common/gps.mk
 
-#########################################################################
-#
-#                                                Camera
-#
-#########################################################################
-BOARD_HAVE_FRONT_CAM :=true
-BOARD_HAVE_BACK_CAM :=true
-
-PRODUCT_COPY_FILES += \
-	frameworks/native/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
-	frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml
-#	frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml
-	
-PRODUCT_PROPERTY_OVERRIDES += \
-	hw.cameras=2
-
-# Camera Orientation
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.camera.orientation.front=0 \
-	ro.camera.orientation.back=0
-
-#########################################################################
-#
-#                                                Sensor
-#
-#########################################################################
-
-#define gsensor install position, this value is 4-bit number, bit0:xy swap;bit1:Z direction;bit2:y direction;bit3:z direction	
-PRODUCT_PROPERTY_OVERRIDES += \
-	rw.sensors.gsensor.installdir=1100
-
-# uncomment features file copy if board have some sensor
-PRODUCT_COPY_FILES += \
-	frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml
-#	frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
-#	frameworks/native/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
-#	frameworks/native/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
-#	frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
 
 
 #########################################################################
@@ -139,10 +109,10 @@ PRODUCT_COPY_FILES += \
 #########################################################################
 
 PRODUCT_COPY_FILES += \
-	device/amlogic/common/init/tablet/init.amlogic.rc:root/init.amlogic.rc \
+	device/amlogic/common/init/mbx/init.amlogic.rc:root/init.amlogic.rc \
 	$(LOCAL_PATH)/init.amlogic.usb.rc:root/init.amlogic.usb.rc \
 	$(LOCAL_PATH)/init.amlogic.board.rc:root/init.amlogic.board.rc \
-	device/amlogic/common/init/tablet/ueventd.amlogic.rc:root/ueventd.amlogic.rc
+	device/amlogic/common/init/mbx/ueventd.amlogic.rc:root/ueventd.amlogic.rc
 
 
 #########################################################################
@@ -169,8 +139,13 @@ BUILD_WITH_APP_OPTIMIZATION := true
 BUILD_WITH_WIDEVINE_DRM := true
 BUILD_WITH_FLASH_PLAYER := true
 BUILD_WITH_EREADER := true 
-# facelock enable, board should has front camera
+BUILD_WITH_MIRACAST := true
+BUILD_WITH_XIAOCONG := true
+BUILD_WITH_THIRDPART_APK := true
+ifeq ($(wildcard vendor/google/products/gms.mk),)
+# facelock enable, board should have front camera
 BUILD_WITH_FACE_UNLOCK := true
+endif
 
 include device/amlogic/common/software.mk
 
@@ -188,39 +163,65 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 
 PRODUCT_PACKAGES += \
-	lights.amlogic \
 	FileBrowser \
 	AppInstaller \
 	VideoPlayer \
+	SubTitle \
+	Samba \
+	smbd\
+	libsmbbase \
+	libsmbmnt \
+	RemoteIME \
 	remotecfg \
-        HdmiSwitch \
-	fw_env
-
+	PPPoE \
+        libpppoejni \
+        pppoe_wrapper \
+        pppoe \
+        amlogic.pppoe \
+        amlogic.pppoe.xml \
+	DLNA \
+	OTAUpgrade \
+	RC_Server \
+	AmlMiracast \
+	MediaBoxLauncher \
+	MboxSetting \
+	Discovery.apk \
+	IpRemote.apk \
+	xiamimusic
+	
 # Device specific system feature description
 PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
-	frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml
-
-
-# This only for m3
-# Battery icons shown from uboot
-#PRODUCT_COPY_FILES += \
-#	device/amlogic/common/res/battery/0.rot270.bmp:system/resource/battery_pic/0.bmp \
-#	device/amlogic/common/res/battery/1.rot270.bmp:system/resource/battery_pic/1.bmp \
-#	device/amlogic/common/res/battery/2.rot270.bmp:system/resource/battery_pic/2.bmp \
-#	device/amlogic/common/res/battery/3.rot270.bmp:system/resource/battery_pic/3.bmp \
-#	device/amlogic/common/res/battery/4.rot270.bmp:system/resource/battery_pic/4.bmp \
-#	device/amlogic/common/res/battery/power_low.rot270.bmp:system/resource/battery_pic/power_low.bmp
+	$(LOCAL_PATH)/Third_party_apk_camera.xml:system/etc/Third_party_apk_camera.xml \
+	frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
+	frameworks/native/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
+	frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml
 
 
 PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/alarm_blacklist.txt:/system/etc/alarm_blacklist.txt \
-	$(LOCAL_PATH)/remote.conf:system/etc/remote.conf
-#	$(LOCAL_PATH)/bootanimation.zip:system/media/bootanimation.zip \
+	$(LOCAL_PATH)/alarm_whitelist.txt:/system/etc/alarm_whitelist.txt \
+	$(LOCAL_PATH)/initlogo-robot-1280x720.rle:root/initlogo.720p.rle \
+	$(LOCAL_PATH)/initlogo-robot-1920x1080.rle:root/initlogo.1080p.rle \
+	$(LOCAL_PATH)/remote.conf:system/etc/remote.conf \
+	$(LOCAL_PATH)/default_shortcut.cfg:system/etc/default_shortcut.cfg \
+	$(LOCAL_PATH)/bootanimation.zip:system/media/bootanimation.zip \
+	$(LOCAL_PATH)/../common/res/logo/robot.1280x720_firstinit.rle:root/firstinitlogo.rle
 
 
 PRODUCT_COPY_FILES += \
+	device/amlogic/common/res/screen_saver/dlna.jpg:system/media/screensaver/images/dlna.jpg \
+	device/amlogic/common/res/screen_saver/miracast.jpg:system/media/screensaver/images/miracast.jpg \
+	device/amlogic/common/res/screen_saver/phone_remote.jpg:system/media/screensaver/images/phone_remote.jpg
+
+PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/u-boot.bin:u-boot.bin
+
+# App optimization
+PRODUCT_COPY_FILES += \
+	$(LOCAL_PATH)/liboptimization.so:system/lib/liboptimization.so \
+	$(LOCAL_PATH)/config:system/etc/config
+	
 
 
 # inherit from the non-open-source side, if present

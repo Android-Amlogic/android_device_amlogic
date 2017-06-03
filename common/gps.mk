@@ -39,7 +39,7 @@ PRODUCT_COPY_FILES += \
 
 endif
 
-ifeq ($(GPS_MODULE),AP6476)
+ifeq ($(GPS_MODULE), AP6476)
 PRODUCT_PROPERTY_OVERRIDES += \
 	gps.enable=true
 

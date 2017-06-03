@@ -14,16 +14,11 @@ esac
 #fi
 outputmode=$(getprop ubootenv.var.outputmode)
 scalemode=$(getprop ro.platform.has.1080scale)
-if [ "$scalemode" = "2" ] ; then
-    #if [ $DVB_EXIST = yes ]; then
-        #echo 0 0 1280 720 0 0 1240 690 > /sys/class/display/axis
-    #else
-        #echo 0 0 1280 720 0 0 18 18 > /sys/class/display/axis
-    #fi
-    setprop ro.sf.lcd_density 160
-    setprop qemu.sf.lcd_density 160
-    sleep 1
-fi
+
+echo 1280 720 > /sys/class/ppmgr/disp
+setprop ro.sf.lcd_density 160
+setprop qemu.sf.lcd_density 160
+
         
 case $outputmode in 
     480p)
@@ -47,7 +42,6 @@ case $outputmode in
     ;;
     
     480i)
-    
     if [ "$(getprop ubootenv.var.480ioutputx)" = "" ] ; then 
             outputx=0
         else outputx=$(getprop ubootenv.var.480ioutputx)
@@ -65,7 +59,6 @@ case $outputmode in
         else outputheight=$(getprop ubootenv.var.480ioutputheight)    
      fi  
     ;; 
-       
     576p)
     if [ "$(getprop ubootenv.var.576poutputx)" = "" ] ; then 
             outputx=0
@@ -240,7 +233,7 @@ case $outputmode in
  
 esac
 if [ "$outputmode" = "480i" -o "$outputmode" = "576i" ]; then
-  if [ "$(getprop ubootenv.var.cvbsenable)" = "true" ] ; then
+  if [ "$(getprop ro.platform.has.cvbsmode)" = "true" ] ; then
     if [ "$outputmode" = "480i" ];then
       echo 480cvbs > /sys/class/display/mode
     else
@@ -248,27 +241,24 @@ if [ "$outputmode" = "480i" -o "$outputmode" = "576i" ]; then
     fi  
   else
     echo $outputmode > /sys/class/display/mode
-  fi
+  fi  
 else  
-echo $outputmode > /sys/class/display/mode                                                                                                                                      
+    echo $outputmode > /sys/class/display/mode                                                                                                                                      
 fi
+
+#echo 0 0 1280 720 0 0 18 18 > /sys/class/display/axis
+echo 0 > /sys/class/graphics/fb0/freescale_mode
+echo 0 0 1279 719 > /sys/class/graphics/fb0/free_scale_axis
+echo 0 0 1279 719 > /sys/class/video/axis
 busybox echo $outputx $outputy $(($outputwidth + $outputx - 1)) $(($outputheight + $outputy - 1)) 0 > /sys/class/ppmgr/ppscaler_rect                     
-echo 1 > /sys/class/graphics/fb0/free_scale                                                                                                                                      
-echo 1 > /sys/class/graphics/fb1/free_scale    
-                                                                                                                                  
-if [ "$(getprop ubootenv.var.digitaudiooutput)" = "RAW" ] ; then
+echo 2 > /sys/class/graphics/fb0/request2XScale
+
+
+if [ "$(getprop ubootenv.var.digitaudiooutput)" = "SPDIF passthrough" ] ; then
     echo 1 > /sys/class/audiodsp/digital_raw
-elif [ "$(getprop ubootenv.var.digitaudiooutput)" = "SPDIF passthrough" ] ; then
-    echo 2 > /sys/class/audiodsp/digital_raw
 elif [ "$(getprop ubootenv.var.digitaudiooutput)" = "HDMI passthrough" ] ; then  
-    echo 3 > /sys/class/audiodsp/digital_raw
+    echo 2 > /sys/class/audiodsp/digital_raw
 else
     echo 0 > /sys/class/audiodsp/digital_raw
 fi
 
-echo 0 > /sys/class/graphics/fb1/blank
-echo 1 > /sys/class/graphics/fb1/blank
-fbset -fb /dev/graphics/fb1 -g 32 32 32 32 $osd_bits
-echo 1 > /sys/class/graphics/fb1/blank
-#sleep 8
-#echo m 0x1d26 '0x10b1' > /sys/class/display/wr_reg

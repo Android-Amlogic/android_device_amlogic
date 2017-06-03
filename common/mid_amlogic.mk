@@ -82,6 +82,7 @@ PRODUCT_PACKAGES += \
     mali.ko \
     ump.ko \
     egl.cfg \
+    gralloc.amlogic \
     hwcomposer.amlogic
 
 # Player
@@ -136,7 +137,7 @@ PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.touchscreen.xml:system/etc/permissions/android.hardware.touchscreen.xml \
 	frameworks/native/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
 	frameworks/native/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml
-
+    
 #copy all possible idc to target
 PRODUCT_COPY_FILES += \
     device/amlogic/common/idc/ft5x06.idc:system/usr/idc/ft5x06.idc \
