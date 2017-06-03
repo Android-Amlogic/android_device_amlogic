@@ -1,0 +1,2 @@
+allow kernel self:capability mknod;
+allow kernel device:blk_file create_file_perms;

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<Instaboot>
+  <!-- while list of app start before do snapshot -->
+  <WhileList>
+    <pkg name="com.ihome.android.launcher2" />
+  </WhileList>
+
+  <Global>
+    <!-- auto enable instaboot after system first boot or not.
+      if the device have setup wizard, need set 0, and call
+      InstabootManager.enable in setup setup wizard -->
+    <default_enable>1</default_enable>
+
+    <!--the way to rescan app, default to 1 -->
+    <rescan_app_mode>1</rescan_app_mode>
+
+    <!--start luancher after system snapshot, default to 0 -->
+    <start_home_after_snapshot>0</start_home_after_snapshot>
+  </Global>
+</Instaboot>

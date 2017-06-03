@@ -14,77 +14,74 @@
 
 #
 # This file is the build configuration for a full Android
-# build for MX reference board. This cleanly combines a set of
-# device-specific aspects (drivers) with a device-agnostic
-# product configuration (apps).
+# build for Meson reference board.
 #
 
 # Inherit from those products. Most specific first.
-$(call inherit-product-if-exists, vendor/google/products/gms.mk)
-$(call inherit-product, device/amlogic/common/mid_amlogic.mk)
-#$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
 
-include frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk
+$(call inherit-product, device/amlogic/common/products/tablet/product_tablet.mk)
+$(call inherit-product, device/amlogic/m102/device.mk)
 
-# Discard inherited values and use our own instead.
-PRODUCT_NAME := m102
-PRODUCT_MANUFACTURER := MID
-PRODUCT_DEVICE := m102
-PRODUCT_MODEL := m102
-PRODUCT_CHARACTERISTICS := tablet
+# m102:
 
+NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 
-TARGET_SUPPORT_USB_BURNING_V2 := true
-ifeq ($(TARGET_SUPPORT_USB_BURNING_V2),true)
-TARGET_USB_BURNING_V2_DEPEND_MODULES := img-package
-#BOARD_USERDATAIMAGE_PARTITION_SIZE := 12884901888
-#BOARD_CACHEIMAGE_PARTITION_SIZE := 367001600
-#BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
-endif
+# use EXTERNAL display
+TARGET_EXTERNAL_DISPLAY := true
+# should used with TARGET_EXTERNAL_DISPLAY=true
+TARGET_SINGLE_EXTERNAL_DISPLAY_USE_FB1 := true
 
-#framebuffer use 3 buffers
-TARGET_USE_TRIPLE_FB_BUFFERS := true
-#########################################################################
-#
-#                                                Audio
-#
-#########################################################################
-
-#possible options: 1 tiny 2 legacy
-BOARD_ALSA_AUDIO := tiny
-BOARD_AUDIO_CODEC := amlpmu3
-
-ifneq ($(strip $(wildcard $(LOCAL_PATH)/mixer_paths.xml)),)
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/mixer_paths.xml:system/etc/mixer_paths.xml
-endif
-
-include device/amlogic/common/audio.mk
-
-ifeq ($(BOARD_ALSA_AUDIO),legacy)
+ifeq ($(TARGET_EXTERNAL_DISPLAY),true)
 PRODUCT_PROPERTY_OVERRIDES += \
-    alsa.mixer.capture.master=Digital \
-    alsa.mixer.capture.headset=Digital \
-    alsa.mixer.capture.earpiece=Digital
+    ro.real.externaldisplay=true \
+    ro.module.singleoutput=true \
+    ro.screen.portrait=true \
+    ro.module.dualscaler=true
+ifeq ($(TARGET_SINGLE_EXTERNAL_DISPLAY_USE_FB1),true)
+#copy set_display_mode.sh
+PRODUCT_COPY_FILES += \
+    device/amlogic/m102/files/mesondisplay_fb1.cfg:system/etc/mesondisplay.cfg
+endif
 endif
 
-#########################################################################
-#
-#                                                USB
-#
-#########################################################################
+PRODUCT_COPY_FILES += \
+    device/amlogic/m102/files/mesondisplay.cfg:system/etc/mesondisplay.cfg
 
-BOARD_USES_USB_PM := true
-	
+PRODUCT_PROPERTY_OVERRIDES += \
+        sys.fb.bits=32
+
+PRODUCT_NAME := m102
+PRODUCT_DEVICE := m102
+PRODUCT_BRAND := Android
+PRODUCT_MODEL := AOSP on m102
+PRODUCT_MANUFACTURER := amlogic
+
+PRODUCT_PACKAGE_OVERLAYS :=  device/amlogic/m102/overlay $(PRODUCT_PACKAGE_OVERLAYS)
+
+WITH_LIBPLAYER_MODULE := false
+
+##########################################################################
+#
+#                                                Dm-Verity
+#
 #########################################################################
+#BUILD_WITH_DM_VERITY := true
+ifeq ($(BUILD_WITH_DM_VERITY), true)
+PRODUCT_COPY_FILES += \
+    device/amlogic/m102/fstab.verity.amlogic:root/fstab.amlogic
+else
+PRODUCT_COPY_FILES += \
+    device/amlogic/m102/fstab.amlogic:root/fstab.amlogic
+endif
+########################################################################
 #
 #                                                WiFi
 #
 #########################################################################
 
-#WIFI_MODULE := bcm40183
-WIFI_MODULE := rtl8189es
+WIFI_MODULE := rtl8188eu
 include device/amlogic/common/wifi.mk
+include device/amlogic/common/mobile.mk
 
 # Change this to match target country
 # 11 North America; 14 Japan; 13 rest of world
@@ -97,159 +94,83 @@ PRODUCT_DEFAULT_WIFI_CHANNELS := 11
 #
 #########################################################################
 BOARD_HAVE_BLUETOOTH := false
-BLUETOOTH_MODULE := 
-
+BLUETOOTH_MODULE :=
 include device/amlogic/common/bluetooth.mk
 
 #########################################################################
 #
-#                                                GPS
-#
-#########################################################################
-
-GPS_MODULE :=
-include device/amlogic/common/gps.mk
-
-#########################################################################
-#
-#                                                Camera
-#
-#########################################################################
-BOARD_HAVE_FRONT_CAM :=true
-BOARD_HAVE_BACK_CAM :=true
-IS_CAM_NONBLOCK := true
-BOARD_HAVE_HW_JPEGENC := true
-
-PRODUCT_COPY_FILES += \
-	frameworks/native/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
-	frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml
-#	frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml
-	
-PRODUCT_PROPERTY_OVERRIDES += \
-	hw.cameras=2
-
-# Camera Orientation
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.camera.orientation.front=270 \
-	ro.camera.orientation.back=90
-
-
-
-# uncomment features file copy if board have some sensor
-PRODUCT_COPY_FILES += \
-	frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml
-#	frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
-#	frameworks/native/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
-#	frameworks/native/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
-#	frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
-
-
-#########################################################################
-#
-#                                                Init.rc
+#                                                Sensors
 #
 #########################################################################
 
 PRODUCT_COPY_FILES += \
-	device/amlogic/common/init/tablet/init.amlogic.rc:root/init.amlogic.rc \
-	$(LOCAL_PATH)/init.amlogic.usb.rc:root/init.amlogic.usb.rc \
-	$(LOCAL_PATH)/init.amlogic.board.rc:root/init.amlogic.board.rc \
-	device/amlogic/common/init/tablet/ueventd.amlogic.rc:root/ueventd.amlogic.rc
+    frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
+    frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml
 
+
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.software.app_widgets.xml:system/etc/permissions/android.software.app_widgets.xml \
+    frameworks/native/data/etc/android.software.backup.xml:system/etc/permissions/android.software.backup.xml \
+    frameworks/native/data/etc/android.hardware.screen.landscape.xml:system/etc/permissions/android.hardware.screen.landscape.xml \
+    frameworks/native/data/etc/android.hardware.screen.portrait.xml:system/etc/permissions/android.hardware.screen.portrait.xml \
+    frameworks/native/data/etc/android.hardware.touchscreen.xml:system/etc/permissions/android.hardware.touchscreen.xml \
+    frameworks/native/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
+    device/amlogic/m102/files/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
+    frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
+    frameworks/native/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml
+
+# Audio
+#
+BOARD_ALSA_AUDIO=tiny
+include device/amlogic/common/audio.mk
 
 #########################################################################
 #
-#                                                languages
+#                                                PlayReady DRM
+#
+#########################################################################
+#BUILD_WITH_PLAYREADY_DRM := true
+ifeq ($(BUILD_WITH_PLAYREADY_DRM), true)
+#playready license process in smoothstreaming(default)
+BOARD_PLAYREADY_LP_IN_SS := true
+#BOARD_PLAYREADY_TVP := true
+endif
+
+#########################################################################
+#
+#                                                Verimatrix DRM
+##########################################################################
+#verimatrix web
+BUILD_WITH_VIEWRIGHT_WEB := false
+#verimatrix stb
+BUILD_WITH_VIEWRIGHT_STB := false
+#########################################################################
+
+
+#DRM Widevine
+BOARD_WIDEVINE_OEMCRYPTO_LEVEL := 3
+
+$(call inherit-product, device/amlogic/common/media.mk)
+
+#########################################################################
+#
+#                                                Languages
 #
 #########################################################################
 
 # For all locales, $(call inherit-product, build/target/product/languages_full.mk)
-PRODUCT_LOCALES := en_US fr_FR it_IT es_ES de_DE nl_NL cs_CZ pl_PL ja_JP zh_TW zh_CN ru_RU \
-   ko_KR nb_NO es_US da_DK el_GR tr_TR pt_PT pt_BR rm_CH sv_SE bg_BG ca_ES en_GB fi_FI hi_IN \
-   hr_HR hu_HU in_ID iw_IL lt_LT lv_LV ro_RO sk_SK sl_SI sr_RS uk_UA vi_VN tl_PH ar_EG fa_IR \
-   th_TH sw_TZ ms_MY af_ZA zu_ZA am_ET hi_IN
+PRODUCT_LOCALES := en_US en_AU en_IN fr_FR it_IT es_ES et_EE de_DE nl_NL cs_CZ pl_PL ja_JP \
+  zh_TW zh_CN zh_HK ru_RU ko_KR nb_NO es_US da_DK el_GR tr_TR pt_PT pt_BR rm_CH sv_SE bg_BG \
+  ca_ES en_GB fi_FI hi_IN hr_HR hu_HU in_ID iw_IL lt_LT lv_LV ro_RO sk_SK sl_SI sr_RS uk_UA \
+  vi_VN tl_PH ar_EG fa_IR th_TH sw_TZ ms_MY af_ZA zu_ZA am_ET hi_IN en_XA ar_XB fr_CA km_KH \
+  lo_LA ne_NP si_LK mn_MN hy_AM az_AZ ka_GE my_MM mr_IN ml_IN is_IS mk_MK ky_KG eu_ES gl_ES \
+  bn_BD ta_IN kn_IN te_IN uz_UZ ur_PK kk_KZ
 
-
-#########################################################################
+#################################################################################
 #
-#                                                Software features
+#                                                DEFAULT LOWMEMORYKILLER CONFIG
 #
-#########################################################################
+#################################################################################
+BUILD_WITH_LOWMEM_COMMON_CONFIG := true
 
-BUILD_WITH_AMLOGIC_PLAYER := true
-BUILD_WITH_APP_OPTIMIZATION := true
-BUILD_WITH_WIDEVINE_DRM := true
-BUILD_WITH_EREADER := true 
-ifeq ($(wildcard vendor/google/products/gms.mk),)
-# facelock enable, board should have front camera
-BUILD_WITH_FACE_UNLOCK := true
-endif
-
-include device/amlogic/common/software.mk
-
-#########################################################################
-#
-#                                                Misc
-#
-#########################################################################
-
-
-# The OpenGL ES API level that is natively supported by this device.
-# This is a 16.16 fixed point number
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.opengles.version=131072
-
-
-PRODUCT_PACKAGES += \
-	lights.amlogic \
-	FileBrowser \
-	AppInstaller \
-	VideoPlayer \
-	SubTitle \
-	HdmiSwitch \
-	fw_env \
-	PromptUser
-
-# Device specific system feature description
-PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
-	$(LOCAL_PATH)/Third_party_apk_camera.xml:system/etc/Third_party_apk_camera.xml \
-	frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml
-
-
-# This only for m3
-# Battery icons shown from uboot
-#PRODUCT_COPY_FILES += \
-#	device/amlogic/common/res/battery/0.rot270.bmp:system/resource/battery_pic/0.bmp \
-#	device/amlogic/common/res/battery/1.rot270.bmp:system/resource/battery_pic/1.bmp \
-#	device/amlogic/common/res/battery/2.rot270.bmp:system/resource/battery_pic/2.bmp \
-#	device/amlogic/common/res/battery/3.rot270.bmp:system/resource/battery_pic/3.bmp \
-#	device/amlogic/common/res/battery/4.rot270.bmp:system/resource/battery_pic/4.bmp \
-#	device/amlogic/common/res/battery/power_low.rot270.bmp:system/resource/battery_pic/power_low.bmp
-
-
-PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/alarm_blacklist.txt:/system/etc/alarm_blacklist.txt \
-	$(LOCAL_PATH)/alarm_whitelist.txt:/system/etc/alarm_whitelist.txt \
-	$(LOCAL_PATH)/sensor_access.txt:/system/etc/sensor_access.txt \
-	$(LOCAL_PATH)/ds1-default.xml:/system/etc/ds1-default.xml
-#	$(LOCAL_PATH)/bootanimation.zip:system/media/bootanimation.zip \
-
-#touch firmware	
-PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/touch/ft5x06.fw:system/etc/touch/ft5x06.fw \
-	$(LOCAL_PATH)/touch/goodix.cfg:system/etc/touch/goodix.cfg \
-	$(LOCAL_PATH)/touch/ct36x.dat:system/etc/touch/ct36x.dat
-
-PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/u-boot.bin:u-boot.bin
-#low memory killer
-PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/lowmemorykiller.txt:/system/etc/lowmemorykiller.txt
-
-PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/../common/res/logo/robot.768x1024.rot180.rle:root/initlogo.rle.bak \
-	$(LOCAL_PATH)/../common/res/logo/robot.768x1024.rot180_firstinit.rle:root/firstinitlogo.rle
-	
-# inherit from the non-open-source side, if present
-$(call inherit-product-if-exists, vendor/amlogic/m102/device-vendor.mk)
+BOARD_USES_USB_PM := true

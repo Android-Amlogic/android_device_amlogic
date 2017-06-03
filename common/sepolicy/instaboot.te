@@ -1,0 +1,45 @@
+type instaboot, domain;
+type instaboot_exec, exec_type, file_type;
+
+init_daemon_domain(instaboot)
+
+#allow instaboot shell_exec:file rx_file_perms;
+allow instaboot system_file:file execute_no_trans;
+allow instaboot property_socket:sock_file write;
+allow instaboot instaboot_service:service_manager add;
+allow instaboot { ctl_default_prop ctl_bootanim_prop system_prop default_prop }:property_service set;
+allow instaboot property_data_file:dir { open read search };
+allow instaboot init:unix_stream_socket connectto;
+allow instaboot instaboot:capability { sys_admin dac_override sys_ptrace kill};
+allow instaboot labeledfs:filesystem { unmount mount };
+allow instaboot block_device:blk_file { read write open ioctl getattr };
+allow instaboot block_device:dir search;
+allow instaboot sysfs:file write;
+allow instaboot rootfs:dir mounton;
+allow instaboot kernel:process setsched;
+allow instaboot devpts:chr_file { read write open };
+allow instaboot fscklogs:file { write open getattr };
+allow instaboot fscklogs:dir search;
+allow instaboot property_data_file:file { read open getattr };
+allow instaboot powerctl_prop:property_service {set};
+allow instaboot system_data_file:dir { mounton };
+allow instaboot device:dir write;
+
+allow vold domain:dir r_dir_perms;
+allow vold domain:{ file lnk_file } r_file_perms;
+allow vold domain:process { signal sigkill };
+
+allow instaboot sysfs_devices_system_cpu:file write;
+allow instaboot system_control:binder call;
+allow instaboot vold_socket:sock_file {write open read};
+allow instaboot vold:unix_stream_socket connectto;
+
+allow instaboot instaboot_exec:file { entrypoint read };
+#allow instaboot system_file:file { entrypoint };
+allow instaboot self:process execmem;
+
+binder_use(instaboot);
+binder_call(instaboot, system_server)
+#binder_call(instaboot, ?)
+#binder_call(instaboot, ?)
+#binder_service(instaboot)

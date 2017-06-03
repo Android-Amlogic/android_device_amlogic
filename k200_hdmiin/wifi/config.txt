@@ -1,6 +1,0 @@
-#wifi country code 
-#ccode:
-# US CN JP
-ccode=CN
-regRev=0
-

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="display_filter_outputmode">480i60hz,576i50hz,2160p24hz,2160p25hz,2160p30hz,smpte24hz,2160p50hz420,2160p60hz420</string>
+</resources>

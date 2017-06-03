@@ -1,0 +1,2 @@
+type media_prop, property_type;
+type uboot_prop, property_type;

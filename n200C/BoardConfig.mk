@@ -1,4 +1,5 @@
-# Copyright (C) 2010 Amlogic Inc
+#
+# Copyright (C) 2013 The Android Open-Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,16 +12,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# config.mk
-#
-# Product-specific compile-time definitions.
 #
 
+TARGET_CPU_ABI := armeabi-v7a
+TARGET_CPU_ABI2 := armeabi
+TARGET_CPU_SMP := true
+TARGET_ARCH := arm
+TARGET_ARCH_VARIANT := armv7-a-neon
+TARGET_CPU_VARIANT := cortex-a9
 
-# Check Logo Size
+TARGET_NO_BOOTLOADER := false
+TARGET_NO_KERNEL := false
+TARGET_NO_RADIOIMAGE := true
+TARGET_NO_RECOVERY := false
 
-BOARD_TVMODE_ALL_SCALE := true
+TARGET_BOARD_PLATFORM := meson8
+TARGET_BOOTLOADER_BOARD_NAME := n200C
+
+USE_OPENGL_RENDERER := true
+NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
+
+USING_MALI450 := true
+USING_ION := true
+
 # Camera
 USE_CAMERA_STUB := false
 BOARD_HAVE_FRONT_CAM := false
@@ -30,49 +44,24 @@ IS_CAM_NONBLOCK := true
 BOARD_HAVE_FLASHLIGHT := false
 BOARD_HAVE_HW_JPEGENC := true
 
-BOARD_VOUT_USES_FREESCALE := false
-##################################################### CPU
-TARGET_ARCH := arm
-TARGET_ARCH_VARIANT := armv7-a-neon
-TARGET_CPU_ABI := armeabi-v7a
-TARGET_CPU_ABI2 := armeabi
-TARGET_CPU_SMP := true
-TARGET_CPU_VARIANT := cortex-a9
-
-##################################################### release package
-TARGET_BOOTLOADER_BOARD_NAME := n200C
-TARGET_BOARD_PLATFORM := meson8
-TARGET_NO_BOOTLOADER := true
-TARGET_NO_RADIOIMAGE := true
-TARGET_SIMULATOR := false
-
-TARGET_NO_KERNEL := false
-include device/amlogic/$(TARGET_PRODUCT)/Kernel.mk
-TARGET_AMLOGIC_BOOTLOADER := $(PRODUCT_OUT)/u-boot.bin
-TARGET_AMLOGIC_LOGO := $(PRODUCT_OUT)/res-package.img
-TARGET_AMLOGIC_RES_PACKAGE := device/amlogic/n200C/res_pack
-#TARGET_AMLOGIC_AML_LOGO := device/amlogic/n200C/aml_logo.bmp
-# Check Logo Size
-BOARD_MATCH_LOGO_SIZE := true
-#save ubootenv in nand partition
-UBOOTENV_SAVE_IN_NAND := false
-BOARD_UBOOTENV_BIG_SIZE := true
-TARGET_BUILD_WIPE_USERDATA := false
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1073741824
-BOARD_FLASH_BLOCK_SIZE := 2048
-#TARGET_ENABLE_SCALE_FUNCTION := true
-TARGET_HAS_HDMIONLY_FUNCTION := true
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 576716800
+BOARD_CACHEIMAGE_PARTITION_SIZE := 69206016
+BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_FLASH_BLOCK_SIZE := 4096
 
-USE_OPENGL_RENDERER := true
+TARGET_SUPPORT_USB_BURNING_V2 := true
+TARGET_AMLOGIC_RES_PACKAGE := device/amlogic/n200C/logo_img_files
 
-#GPU
-USING_MALI450:=true
-USING_ION:=true
+BOARD_HAL_STATIC_LIBRARIES := libhealthd.mboxdefault
 
-#SENSOR
-BOARD_SENSOR_AMLOGIC:=true
-BOARD_SENSOR_KIONIX_61G:=false
-#PRODUCT_EXTRA_RECOVERY_KEYS := ../common/releasekey.x509.pem
+USE_E2FSPROGS := true
 
+BOARD_USES_GENERIC_AUDIO := false
+BOARD_USES_ALSA_AUDIO := true
+
+TARGET_RELEASETOOLS_EXTENSIONS := device/amlogic/common
+
+BOARD_HAVE_BLUETOOTH_BCM := true
 include device/amlogic/common/sepolicy.mk

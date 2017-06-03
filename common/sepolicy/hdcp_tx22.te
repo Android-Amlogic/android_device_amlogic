@@ -1,0 +1,5 @@
+type hdcp_tx22, domain;
+type hdcp_tx22_exec, exec_type, file_type;
+type hdcptx_device, dev_type;
+
+allow hdcp_tx22 hdcptx_device:chr_file { open read write getattr ioctl };

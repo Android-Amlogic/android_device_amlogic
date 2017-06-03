@@ -1,0 +1,8 @@
+# zygote_proxy daemon
+type zygote_proxy, domain;
+type zygote_proxy_exec, exec_type, file_type;
+init_daemon_domain(zygote_proxy)
+
+allow zygote_proxy property_socket:sock_file write;
+allow zygote_proxy init:unix_stream_socket connectto;
+allow zygote_proxy system_prop:property_service set;

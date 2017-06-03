@@ -1,0 +1,5 @@
+type subtitle_service,          service_manager_type;
+type imageserver_service,       service_manager_type;
+type instaboot_service,         service_manager_type;
+type zygote_proxy_service,      service_manager_type;
+type tvserver_service,          service_manager_type;

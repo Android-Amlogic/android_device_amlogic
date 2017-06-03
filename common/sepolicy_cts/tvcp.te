@@ -1,0 +1,12 @@
+type tvcp, domain;
+type tvcp_exec, exec_type, file_type;
+
+init_daemon_domain(tvcp)
+
+allow tvcp system_file:file execute_no_trans;
+allow tvcp param_file:dir { write add_name };
+allow tvcp param_file:file { open create getattr };
+allow tvcp tvcp_exec:file { entrypoint read };
+allow tvcp shell_exec:file rx_file_perms;
+
+allow tvcp self:process execmem;

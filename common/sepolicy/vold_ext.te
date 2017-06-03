@@ -1,0 +1,32 @@
+type vold_ext, domain;
+type vold_ext_exec, exec_type, file_type;
+
+init_daemon_domain(vold_ext)
+
+allow vold_ext self:capability { setgid setuid sys_rawio };
+
+allow vold_ext fuse_device:chr_file rw_file_perms;
+
+allow vold_ext cpuctl_device:dir search;
+
+allow vold_ext device:dir { open read };
+allow vold_ext usb_device:dir { open read search };
+allow vold_ext usb_device:chr_file { open read write ioctl };
+allow vold_ext system_data_file:fifo_file { open read write ioctl };
+
+allow vold_ext block_device:blk_file rw_file_perms;
+allow vold_ext block_device:dir rw_dir_perms;
+allow vold_ext devpts:chr_file rw_file_perms;
+allow vold_ext fuseblk:filesystem mount;
+allow vold_ext rootfs:dir mounton;
+allow vold_ext self:capability { dac_override sys_admin };
+allow vold_ext vold:fd use;
+allow vold_ext vold:fifo_file { read write };
+allow vold_ext vold:netlink_kobject_uevent_socket { read write };
+allow vold_ext vold:unix_stream_socket { read write };
+
+allow vold_ext tmpfs:filesystem { mount unmount };
+allow vold_ext tmpfs:dir create_dir_perms;
+allow vold_ext tmpfs:dir mounton;
+
+allow vold_ext kernel:system module_request;

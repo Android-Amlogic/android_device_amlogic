@@ -1,3 +1,0 @@
-add_lunch_combo k200_hdmiin-eng
-add_lunch_combo k200_hdmiin-user
-add_lunch_combo k200_hdmiin-userdebug

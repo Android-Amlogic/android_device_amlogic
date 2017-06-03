@@ -1,0 +1,13 @@
+on init
+
+on fs
+
+on boot
+service remotecontrol /sbin/remotecfg /etc/remote.conf
+    oneshot
+
+service systemcontrol /sbin/systemcontrol_static /etc/mesondisplay.cfg
+    oneshot
+
+service console /sbin/sh
+    console

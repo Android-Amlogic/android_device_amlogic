@@ -14,28 +14,162 @@
 # limitations under the License.
 #
 
-#Support moduels:
+#Supported modules:
 #                bcm40183
 #                bcm40181
-#                rtl8192cu
+#		 bcm43458
 #                rtl8188eu
 #                rt5370
 #                rt8189es
-#								 mt7601
-#								 mt5931
+#                rt8723bs
+#                rtl8723au
+#                mt7601
+#                mt5931
+#                AP62x2
+#                AP6335
+#                AP6441
+#                AP6234
+#                AP6181
+#                AP6210
+#                bcm43341
+#                bcm43241
+#                rtl8192du
+#                rtl8192eu
+#                rtl8192cu
+#                rtl88x1au
+#                rtl8812au
+
 
 PRODUCT_PACKAGES += wpa_supplicant.conf
-PRODUCT_PACKAGES += hostapd_wps
 
-PRODUCT_COPY_FILES += \
-	device/amlogic/common/tools/wififix.sh:system/bin/wififix.sh
-	
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.carrier=wifi-only
 
+################################################################################## bcm4354
+ifeq ($(WIFI_MODULE),bcm4354)
+WIFI_DRIVER := bcm4354
+WIFI_DRIVER_MODULE_PATH := /system/lib/dhd.ko
+WIFI_DRIVER_MODULE_NAME := dhd
+WIFI_DRIVER_MODULE_ARG  := "firmware_path=/etc/wifi/4354/fw_bcm4354a1_ag.bin nvram_path=/etc/wifi/4354/nvram_ap6354.txt"
+WIFI_DRIVER_FW_PATH_STA := /etc/wifi/4354/fw_bcm4354a1_ag.bin
+WIFI_DRIVER_FW_PATH_AP  := /etc/wifi/4354/fw_bcm4354a1_ag_apsta.bin
+WIFI_DRIVER_FW_PATH_P2P := /etc/wifi/4354/fw_bcm4354a1_ag_p2p.bin
+
+BOARD_WLAN_DEVICE := bcmdhd
+WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
+
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_DRIVER        := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+
+PRODUCT_PACKAGES += \
+	4354/nvram_ap6354.txt \
+	4354/fw_bcm4354a1_ag.bin \
+	4354/fw_bcm4354a1_ag_apsta.bin \
+	4354/fw_bcm4354a1_ag_p2p.bin \
+	wl \
+	p2p_supplicant_overlay.conf \
+	dhd
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/dhd.ko),)
+PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/dhd.ko:system/lib/dhd.ko
+endif
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
+
+
+
+################################################################################## bcm4356
+ifeq ($(WIFI_MODULE),bcm4356)
+WIFI_DRIVER := bcm4356
+WIFI_DRIVER_MODULE_PATH := /system/lib/dhd.ko
+WIFI_DRIVER_MODULE_NAME := dhd
+WIFI_DRIVER_MODULE_ARG  := "firmware_path=/etc/wifi/4356/fw_bcm4356a2_ag.bin nvram_path=/etc/wifi/4356/nvram_ap6356.txt"
+WIFI_DRIVER_FW_PATH_STA := /etc/wifi/4356/fw_bcm4356a2_ag.bin
+WIFI_DRIVER_FW_PATH_AP  := /etc/wifi/4356/fw_bcm4356a2_ag_apsta.bin
+WIFI_DRIVER_FW_PATH_P2P := /etc/wifi/4356/fw_bcm4356a2_ag_p2p.bin
+
+BOARD_WLAN_DEVICE := bcmdhd
+WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
+
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_DRIVER        := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+
+PRODUCT_PACKAGES += \
+        4356/nvram_ap6356.txt \
+        4356/fw_bcm4356a2_ag.bin \
+	4356/fw_bcm4356a2_ag_apsta.bin \
+	4356/fw_bcm4356a2_ag_p2p.bin \
+        wl \
+        p2p_supplicant_overlay.conf \
+        dhd
+
+PRODUCT_COPY_FILES += \
+        frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/dhd.ko),)
+PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/dhd.ko:system/lib/dhd.ko
+endif
+
+PRODUCT_PROPERTY_OVERRIDES += \
+        wifi.interface=wlan0
+
+endif
+
+
+################################################################################## bcm43458
+ifeq ($(WIFI_MODULE),bcm43458)
+WIFI_DRIVER := bcm43458
+WIFI_DRIVER_MODULE_PATH := /system/lib/dhd.ko
+WIFI_DRIVER_MODULE_NAME := dhd
+WIFI_DRIVER_MODULE_ARG  := "firmware_path=/etc/wifi/43458/fw_bcm43455c0_ag.bin nvram_path=/etc/wifi/43458/nvram_43458.txt"
+WIFI_DRIVER_FW_PATH_STA := /etc/wifi/43458/fw_bcm43455c0_ag.bin
+WIFI_DRIVER_FW_PATH_AP  := /etc/wifi/43458/fw_bcm43455c0_ag_apsta.bin
+WIFI_DRIVER_FW_PATH_P2P := /etc/wifi/43458/fw_bcm43455c0_ag_p2p.bin
+
+BOARD_WLAN_DEVICE := bcmdhd
+WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
+
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_DRIVER        := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+
+PRODUCT_PACKAGES += \
+        43458/nvram_43458.txt \
+        43458/fw_bcm43455c0_ag.bin \
+	 43458/fw_bcm43455c0_ag_apsta.bin \
+	 43458/fw_bcm43455c0_ag_p2p.bin \
+        wl \
+	p2p_supplicant_overlay.conf \
+        dhd
+
+PRODUCT_COPY_FILES += \
+        frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/dhd.ko),)
+PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/dhd.ko:system/lib/dhd.ko
+endif
+
+PRODUCT_PROPERTY_OVERRIDES += \
+        wifi.interface=wlan0
+
+endif
 
 ################################################################################## 8189es
 ifeq ($(WIFI_MODULE),rtl8189es)
@@ -46,17 +180,14 @@ WIFI_DRIVER_MODULE_PATH := /system/lib/8189es.ko
 WIFI_DRIVER_MODULE_NAME := 8189es
 WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
 WIFI_FIRMWARE_LOADER :=""
-WIFI_DRIVER_FW_PATH_STA :=""
-WIFI_DRIVER_FW_PATH_AP  :=""
-WIFI_DRIVER_FW_PATH_P2P :=""
 WIFI_DRIVER_FW_PATH_PARAM :=""
 
 BOARD_WLAN_DEVICE := rtl8189es
+LIB_WIFI_HAL := libwifi-hal-rtl
 WIFI_DRIVER_FW_PATH_PARAM   := ""
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-CONFIG_DRIVER_WEXT :=y
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_rtl
 BOARD_HOSTAPD_DRIVER        := NL80211
 BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_rtl
@@ -78,6 +209,86 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
 
 endif
+
+
+################################################################################## 8189es
+ifeq ($(WIFI_MODULE),rtl8189fs)
+
+WIFI_DRIVER := 8189fs
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8189fs.ko
+WIFI_DRIVER_MODULE_NAME := 8189fs
+WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
+WIFI_FIRMWARE_LOADER :=""
+WIFI_DRIVER_FW_PATH_PARAM :=""
+
+BOARD_WLAN_DEVICE := rtl8189fs
+LIB_WIFI_HAL := libwifi-hal-rtl
+WIFI_DRIVER_FW_PATH_PARAM   := ""
+
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_rtl
+BOARD_HOSTAPD_DRIVER        := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_rtl
+
+PRODUCT_COPY_FILES += \
+	hardware/amlogic/wifi/rtl8189fs/config/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf
+
+PRODUCT_COPY_FILES += \
+	hardware/amlogic/wifi/rtl8189fs/config/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/8189fs.ko),)
+PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/8189fs.ko:system/lib/8189fs.ko
+endif
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
+
+
+################################################################################## 8723bs
+ifeq ($(WIFI_MODULE),rtl8723bs)
+
+WIFI_DRIVER := 8723bs
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8723bs.ko
+WIFI_DRIVER_MODULE_NAME := 8723bs
+WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
+WIFI_FIRMWARE_LOADER :=""
+WIFI_DRIVER_FW_PATH_PARAM :=""
+
+BOARD_WLAN_DEVICE := rtl8723bs
+LIB_WIFI_HAL := libwifi-hal-rtl
+WIFI_DRIVER_FW_PATH_PARAM   := ""
+
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_rtl
+BOARD_HOSTAPD_DRIVER        := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_rtl
+
+PRODUCT_COPY_FILES += \
+	hardware/amlogic/wifi/rtl8189es/config/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf
+
+PRODUCT_COPY_FILES += \
+	hardware/amlogic/wifi/rtl8189es/config/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/8723bs.ko),)
+PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/8723bs.ko:system/lib/8723bs.ko
+endif
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
 ################################################################################## bcm40183
 ifeq ($(WIFI_MODULE),bcm40183)
 
@@ -90,13 +301,14 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/40183/fw_bcm40183b2_apsta.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/40183/fw_bcm40183b2_p2p.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_ampak
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_ampak
 
 PRODUCT_PACKAGES += \
 	40183/nvram.txt \
@@ -104,6 +316,7 @@ PRODUCT_PACKAGES += \
 	40183/fw_bcm40183b2_apsta.bin \
 	40183/fw_bcm40183b2_p2p.bin \
 	wl \
+	p2p_supplicant_overlay.conf \
 	dhd
 
 PRODUCT_COPY_FILES += \
@@ -129,13 +342,14 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/40181/fw_bcm40181a2_apsta.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/40181/fw_bcm40181a2_p2p.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_ampak
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_ampak
 
 PRODUCT_PACKAGES += \
 	40181/nvram.txt \
@@ -145,7 +359,8 @@ PRODUCT_PACKAGES += \
 	40181/fw_bcm40181a2_apsta.bin \
 	40181/fw_bcm40181a2_p2p.bin \
 	wl \
-	dhd 
+	p2p_supplicant_overlay.conf \
+	dhd
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
@@ -156,7 +371,7 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 ################################################################################## AP62x2
 ifeq ($(WIFI_MODULE),AP62x2)
@@ -169,13 +384,14 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/62x2/fw_bcm43241b4_ag_apsta.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/62x2/fw_bcm43241b4_ag_p2p.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_ampak
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_ampak
 
 PRODUCT_PACKAGES += \
 	62x2/nvram.txt \
@@ -183,7 +399,8 @@ PRODUCT_PACKAGES += \
 	62x2/fw_bcm43241b4_ag_apsta.bin \
 	62x2/fw_bcm43241b4_ag_p2p.bin \
 	wl \
-	dhd 
+	p2p_supplicant_overlay.conf \
+	dhd
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
@@ -194,7 +411,7 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 ################################################################################## AP6335
 ifeq ($(WIFI_MODULE),AP6335)
@@ -207,24 +424,26 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/6335/fw_bcm4339a0_ag_apsta.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/6335/fw_bcm4339a0_ag_p2p.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_ampak
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_ampak
 PRODUCT_PACKAGES += \
-	6335/nvram.txt    \
+	6335/nvram.txt \
 	6335/fw_bcm4339a0_ag.bin \
 	6335/fw_bcm4339a0_ag_apsta.bin \
 	6335/fw_bcm4339a0_ag_p2p.bin \
-  6335/nvram_ap6335e.txt   \
-  6335/fw_bcm4339a0e_ag.bin \
-  6335/fw_bcm4339a0e_ag_apsta.bin \
-  6335/fw_bcm4339a0e_ag_p2p.bin \
+	6335/nvram_ap6335e.txt   \
+	6335/fw_bcm4339a0e_ag.bin \
+	6335/fw_bcm4339a0e_ag_apsta.bin \
+	6335/fw_bcm4339a0e_ag_p2p.bin \
 	wl \
-	dhd 
+	p2p_supplicant_overlay.conf \
+	dhd
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
@@ -235,7 +454,7 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 ################################################################################## AP6441
 ifeq ($(WIFI_MODULE),AP6441)
@@ -248,20 +467,22 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/6441/fw_bcm43341b0_ag_apsta.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/6441/fw_bcm43341b0_ag_p2p.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_ampak
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_ampak
 PRODUCT_PACKAGES += \
 	6441/nvram.txt    \
 	6441/fw_bcm43341b0_ag.bin \
 	6441/fw_bcm43341b0_ag_apsta.bin \
 	6441/fw_bcm43341b0_ag_p2p.bin \
 	wl \
-	dhd 
+	p2p_supplicant_overlay.conf \
+	dhd
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
@@ -272,7 +493,7 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 
 ################################################################################## AP6234
@@ -286,20 +507,22 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/6234/fw_bcm43341b0_ag_apsta.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/6234/fw_bcm43341b0_ag_p2p.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_ampak
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_ampak
 PRODUCT_PACKAGES += \
 	6234/nvram.txt    \
 	6234/fw_bcm43341b0_ag.bin \
 	6234/fw_bcm43341b0_ag_apsta.bin \
 	6234/fw_bcm43341b0_ag_p2p.bin \
+	p2p_supplicant_overlay.conf \
 	wl \
-	dhd 
+	dhd
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
@@ -310,8 +533,46 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
 endif
+
+################################################################################## AP6212
+ifeq ($(WIFI_MODULE),AP6212)
+WIFI_DRIVER := AP6212
+WIFI_DRIVER_MODULE_PATH := /system/lib/dhd.ko
+WIFI_DRIVER_MODULE_NAME := dhd
+WIFI_DRIVER_MODULE_ARG  := "firmware_path=/etc/wifi/6212/fw_bcm43438a0.bin nvram_path=/etc/wifi/6212/nvram.txt"
+WIFI_DRIVER_FW_PATH_STA := /etc/wifi/6212/fw_bcm43438a0.bin
+WIFI_DRIVER_FW_PATH_AP  := /etc/wifi/6212/fw_bcm43438a0_apsta.bin
+WIFI_DRIVER_FW_PATH_P2P := /etc/wifi/6212/fw_bcm43438a0_p2p.bin
+
+BOARD_WLAN_DEVICE := bcmdhd
+WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
+
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_ampak
+BOARD_HOSTAPD_DRIVER        := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_ampak
+PRODUCT_PACKAGES += \
+	6212/nvram.txt    \
+	6212/fw_bcm43438a0.bin \
+	6212/fw_bcm43438a0_apsta.bin \
+	6212/fw_bcm43438a0_p2p.bin \
+	wl \
+	p2p_supplicant_overlay.conf \
+	dhd
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/dhd.ko),)
+PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/dhd.ko:system/lib/dhd.ko
+endif
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+endif
+
 
 ################################################################################## bcm43341
 ifeq ($(WIFI_MODULE),bcm43341)
@@ -324,18 +585,20 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/fw_bcmdhd_43341.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/fw_bcmdhd_43341.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/bcmdhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_usi
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_usi
 PRODUCT_PACKAGES += \
 	nvram_43341.bin   \
-    fw_bcmdhd_43341.bin \
+	fw_bcmdhd_43341.bin \
 	wl \
-	dhd 
+	p2p_supplicant_overlay.conf \
+	dhd
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
@@ -346,7 +609,7 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 ################################################################################## bcm43241
 ifeq ($(WIFI_MODULE),bcm43241)
@@ -359,18 +622,20 @@ WIFI_DRIVER_FW_PATH_AP  :=/etc/wifi/fw_bcmdhd_43241.bin
 WIFI_DRIVER_FW_PATH_P2P :=/etc/wifi/fw_bcmdhd_43241.bin
 
 BOARD_WLAN_DEVICE := bcmdhd
+LIB_WIFI_HAL := libwifi-hal-bcm
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/bcmdhd/parameters/firmware_path"
 
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd_usi
 BOARD_HOSTAPD_DRIVER        := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd_usi
 PRODUCT_PACKAGES += \
 	nvram_43241.bin   \
-    fw_bcmdhd_43241.bin \
+	fw_bcmdhd_43241.bin \
 	wl \
-	dhd 
+	p2p_supplicant_overlay.conf \
+	dhd
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
@@ -381,7 +646,7 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 ################################################################################## rtl8192cu
 ifeq ($(WIFI_MODULE),rtl8192cu)
@@ -390,65 +655,18 @@ WIFI_DRIVER             := rtl8192cu
 BOARD_WIFI_VENDOR       := realtek
 WIFI_DRIVER_MODULE_PATH := /system/lib/8192cu.ko
 WIFI_DRIVER_MODULE_NAME := 8192cu
-WIFI_DRIVER_FW_PATH_STA := none
 WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
 
 WPA_SUPPLICANT_VERSION           := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
-CONFIG_DRIVER_WEXT               :=y
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
 BOARD_HOSTAPD_DRIVER             := NL80211
 BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
 
 BOARD_WLAN_DEVICE := rtl8192cu
+LIB_WIFI_HAL := libwifi-hal-rtl
 
 WIFI_FIRMWARE_LOADER      := ""
-WIFI_DRIVER_FW_PATH_STA   := ""
-WIFI_DRIVER_FW_PATH_AP    := ""
-WIFI_DRIVER_FW_PATH_P2P   := ""
-WIFI_DRIVER_FW_PATH_PARAM := ""
-
-PRODUCT_COPY_FILES += \
-	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
-
-PRODUCT_COPY_FILES += \
-	hardware/amlogic/wifi/rtl8192cu/config/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf
-
-PRODUCT_COPY_FILES += \
-	hardware/amlogic/wifi/rtl8192cu/config/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf
-		
-ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/8192cu.ko),)
-PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/8192cu.ko:system/lib/8192cu.ko
-endif
-
-PRODUCT_PROPERTY_OVERRIDES += \
-	wifi.interface=wlan0
-	
-endif
-################################################################################## rtl8188eu
-ifeq ($(WIFI_MODULE),rtl8188eu)
-
-PRODUCT_COPY_FILESWIFI_DRIVER             := rtl8188eu
-BOARD_WIFI_VENDOR       := realtek
-WIFI_DRIVER_MODULE_PATH := /system/lib/8188eu.ko
-WIFI_DRIVER_MODULE_NAME := 8188eu
-
-WIFI_DRIVER_FW_PATH_STA          := none
-WIFI_DRIVER_MODULE_ARG           := "ifname=wlan0 if2name=p2p0"
-
-WPA_SUPPLICANT_VERSION           := VER_0_8_X
-BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
-CONFIG_DRIVER_WEXT               :=y
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
-BOARD_HOSTAPD_DRIVER             := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
-
-BOARD_WLAN_DEVICE := rtl8189es
-
-WIFI_FIRMWARE_LOADER      := ""
-WIFI_DRIVER_FW_PATH_STA   := ""
-WIFI_DRIVER_FW_PATH_AP    := ""
-WIFI_DRIVER_FW_PATH_P2P   := ""
 WIFI_DRIVER_FW_PATH_PARAM := ""
 
 PRODUCT_COPY_FILES += \
@@ -460,7 +678,202 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
+endif
+################################################################################## rtl8188eu
+ifeq ($(WIFI_MODULE),rtl8188eu)
+
+WIFI_DRIVER             := rtl8188eu
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8188eu.ko
+WIFI_DRIVER_MODULE_NAME := 8188eu
+
+WIFI_DRIVER_MODULE_ARG    := "ifname=wlan0 if2name=p2p0"
+WIFI_DRIVER_FW_PATH_PARAM := "/dev/null"
+WIFI_DRIVER_FW_PATH_STA   := ""
+WIFI_DRIVER_FW_PATH_AP    := ""
+WIFI_DRIVER_FW_PATH_P2P   := ""
+
+WPA_SUPPLICANT_VERSION           := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
+BOARD_HOSTAPD_DRIVER             := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
+
+BOARD_WLAN_DEVICE := rtl8189es
+LIB_WIFI_HAL := libwifi-hal-rtl
+
+WIFI_FIRMWARE_LOADER      := "wlan_fwloader"
+
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+PRODUCT_PACKAGES += \
+	wpa_supplicant_overlay.conf \
+	p2p_supplicant_overlay.conf \
+	wlan_fwloader
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
+################################################################################## rtl8192du
+ifeq ($(WIFI_MODULE),rtl8192du)
+
+WIFI_DRIVER             := rtl8192du
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8192du.ko
+WIFI_DRIVER_MODULE_NAME := 8192du
+WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
+
+WPA_SUPPLICANT_VERSION           := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
+BOARD_HOSTAPD_DRIVER             := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
+
+BOARD_WLAN_DEVICE := rtl8192du
+LIB_WIFI_HAL := libwifi-hal-rtl
+
+WIFI_FIRMWARE_LOADER      := ""
+WIFI_DRIVER_FW_PATH_PARAM := ""
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+PRODUCT_PACKAGES += \
+	wpa_supplicant_overlay.conf \
+	p2p_supplicant_overlay.conf
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
+################################################################################## rtl8192eu
+ifeq ($(WIFI_MODULE),rtl8192eu)
+
+WIFI_DRIVER             := rtl8192eu
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8192eu.ko
+WIFI_DRIVER_MODULE_NAME := 8192eu
+WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
+
+WPA_SUPPLICANT_VERSION           := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
+BOARD_HOSTAPD_DRIVER             := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
+
+BOARD_WLAN_DEVICE := rtl8192eu
+LIB_WIFI_HAL := libwifi-hal-rtl
+
+WIFI_FIRMWARE_LOADER      := ""
+WIFI_DRIVER_FW_PATH_PARAM := ""
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+PRODUCT_PACKAGES += \
+	wpa_supplicant_overlay.conf \
+	p2p_supplicant_overlay.conf
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
+################################################################################## rtl8723au
+ifeq ($(WIFI_MODULE),rtl8723au)
+
+WIFI_DRIVER             := rtl8723au
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8723au.ko
+WIFI_DRIVER_MODULE_NAME := 8723au
+WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
+
+WPA_SUPPLICANT_VERSION           := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
+BOARD_HOSTAPD_DRIVER             := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
+
+BOARD_WLAN_DEVICE := rtl8723au
+LIB_WIFI_HAL := libwifi-hal-rtl
+
+WIFI_FIRMWARE_LOADER      := ""
+WIFI_DRIVER_FW_PATH_PARAM := ""
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
+################################################################################## rtl8811au,rtl8821au
+ifeq ($(WIFI_MODULE),rtl88x1au)
+
+WIFI_DRIVER             := rtl88x1au
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8821au.ko
+WIFI_DRIVER_MODULE_NAME := 8821au
+WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
+
+WPA_SUPPLICANT_VERSION           := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
+BOARD_HOSTAPD_DRIVER             := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
+
+BOARD_WLAN_DEVICE := rtl88x1au
+LIB_WIFI_HAL := libwifi-hal-rtl
+
+WIFI_FIRMWARE_LOADER      := ""
+WIFI_DRIVER_FW_PATH_PARAM := ""
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+PRODUCT_PACKAGES += \
+	wpa_supplicant_overlay.conf \
+	p2p_supplicant_overlay.conf
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
+endif
+################################################################################## rtl8812au
+ifeq ($(WIFI_MODULE),rtl8812au)
+
+WIFI_DRIVER             := rtl8812au
+BOARD_WIFI_VENDOR       := realtek
+WIFI_DRIVER_MODULE_PATH := /system/lib/8812au.ko
+WIFI_DRIVER_MODULE_NAME := 8812au
+WIFI_DRIVER_MODULE_ARG  := "ifname=wlan0 if2name=p2p0"
+
+WPA_SUPPLICANT_VERSION           := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_nl80211
+BOARD_HOSTAPD_DRIVER             := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_nl80211
+
+BOARD_WLAN_DEVICE := rtl8812au
+LIB_WIFI_HAL := libwifi-hal-rtl
+
+WIFI_FIRMWARE_LOADER      := ""
+WIFI_DRIVER_FW_PATH_PARAM := ""
+
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+
+PRODUCT_PACKAGES += \
+	wpa_supplicant_overlay.conf \
+	p2p_supplicant_overlay.conf
+
+# 89976: Add Realtek USB WiFi support
+PRODUCT_PROPERTY_OVERRIDES += \
+	wifi.interface=wlan0
+
 endif
 ################################################################################## rt5370
 ifeq ($(WIFI_MODULE),rt5370)
@@ -469,12 +882,12 @@ WIFI_DRIVER             := rt5370
 WIFI_DRIVER_MODULE_PATH := /system/lib/rt5370sta.ko
 WIFI_DRIVER_MODULE_NAME := rt5370sta
 
-WIFI_DRIVER_FW_PATH_STA := none
 WPA_SUPPLICANT_VERSION  := VER_0_8_X
 
-CONFIG_DRIVER_WEXT                :=y
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB  := lib_driver_cmd_nl80211
 BOARD_WPA_SUPPLICANT_DRIVER       := NL80211
+
+LIB_WIFI_HAL := libwifi-hal-rtl
 
 ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/rt5370sta.ko),)
 PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/rt5370sta.ko:system/lib/rt5370sta.ko
@@ -482,7 +895,7 @@ endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 
 ################################################################################## mt7601u
@@ -493,42 +906,45 @@ WIFI_DRIVER_MODULE_PATH := /system/lib/mt7601Usta.ko
 WIFI_DRIVER_MODULE_NAME := mt7601Usta
 
 WPA_SUPPLICANT_VERSION  := VER_0_8_X
-CONFIG_DRIVER_WEXT                :=y
 BOARD_WPA_SUPPLICANT_DRIVER       := NL80211
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB  := lib_driver_cmd_mtk
+
+LIB_WIFI_HAL := libwifi-hal-rtl
 
 PRODUCT_COPY_FILES += device/amlogic/$(TARGET_PRODUCT)/MT7601EEPROM.bin:system/bin/MT7601EEPROM.bin
 PRODUCT_COPY_FILES += device/amlogic/$(TARGET_PRODUCT)/RT2870STA.dat:system/etc/Wireless/RT2870STA/RT2870STA.dat
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 ################################################################################## mt5931
 ifeq ($(WIFI_MODULE),mt5931)
 
-MTK_WLAN_SUPPORT				:= true
+MTK_WLAN_SUPPORT        := true
 WIFI_DRIVER             := mt5931
 WIFI_DRIVER_MODULE_PATH := /system/lib/wlan.ko
 WIFI_DRIVER_MODULE_NAME := wlan
 P2P_SUPPLICANT_VERSION  := VER_0_8_X_MTK
 BOARD_P2P_SUPPLICANT_DRIVER       := NL80211
 
- PRODUCT_PACKAGES += \
-      p2p_supplicant.conf	
+LIB_WIFI_HAL := libwifi-hal-rtl
+
+PRODUCT_PACKAGES += \
+	p2p_supplicant.conf
 
 ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/wlan.ko),)
 PRODUCT_COPY_FILES += $(TARGET_PRODUCT_DIR)/wlan.ko:system/lib/wlan.ko
-endif    
+endif
 
 PRODUCT_COPY_FILES += hardware/amlogic/wifi/mt5931/WIFI_RAM_CODE:system/etc/firmware/WIFI_RAM_CODE
 
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
-	
+
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0
-	
+
 endif
 
 ################################################################################## AP6xxx
@@ -575,4 +991,58 @@ PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/AP6330/Wi-Fi/fw_bcm
 PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/AP6330/Wi-Fi/fw_bcm40183b2_p2p.bin:system/etc/wifi/40183/fw_bcm40183b2_p2p.bin
 PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/AP6330/Wi-Fi/nvram_ap6330.txt:system/etc/wifi/40183/nvram.txt
 
+endif
+ifeq ($(MULTI_WIFI_SUPPORT), true)
+
+WIFI_DRIVER_MODULE_PATH := /system/lib/
+WIFI_DRIVER_MODULE_NAME := dhd
+
+WPA_SUPPLICANT_VERSION			:= VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER	:= NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_multi
+BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_multi
+BOARD_HOSTAPD_DRIVER				:= NL80211
+
+WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/dhd/parameters/firmware_path"
+PRODUCT_COPY_FILES += \
+        frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml
+PRODUCT_PROPERTY_OVERRIDES += \
+        wifi.interface=wlan0
+
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6212/fw_bcm43438a0.bin:system/etc/wifi/6212/fw_bcm43438a0.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6212/fw_bcm43438a0_apsta.bin:system/etc/wifi/6212/fw_bcm43438a0_apsta.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6212/fw_bcm43438a0_p2p.bin:system/etc/wifi/6212/fw_bcm43438a0_p2p.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6212/nvram.txt:system/etc/wifi/6212/nvram.txt
+PRODUCT_COPY_FILES += device/amlogic/p200/wifi/config.txt:system/etc/wifi/6212/config.txt
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/62x2/fw_bcm43241b4_ag.bin:system/etc/wifi/62x2/fw_bcm43241b4_ag.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/62x2/fw_bcm43241b4_ag_apsta.bin:system/etc/wifi/62x2/fw_bcm43241b4_ag_apsta.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/62x2/fw_bcm43241b4_ag_p2p.bin:system/etc/wifi/62x2/fw_bcm43241b4_ag_p2p.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/62x2/nvram.txt:system/etc/wifi/62x2/nvram.txt
+PRODUCT_COPY_FILES += device/amlogic/p200/wifi/config.txt:system/etc/wifi/62X2/config.txt
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6335/fw_bcm4339a0_ag.bin:system/etc/wifi/6335/fw_bcm4339a0_ag.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6335/fw_bcm4339a0_ag_apsta.bin:system/etc/wifi/6335/fw_bcm4339a0_ag_apsta.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6335/fw_bcm4339a0_ag_p2p.bin:system/etc/wifi/6335/fw_bcm4339a0_ag_p2p.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/6335/nvram.txt:system/etc/wifi/6335/nvram.txt
+PRODUCT_COPY_FILES += device/amlogic/p200/wifi/config.txt:system/etc/wifi/6335/config.txt
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4356/fw_bcm4356a2_ag.bin:system/etc/wifi/4356/fw_bcm4356a2_ag.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4356/fw_bcm4356a2_ag_apsta.bin:system/etc/wifi/4356/fw_bcm4356a2_ag_apsta.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4356/fw_bcm4356a2_ag_p2p.bin:system/etc/wifi/4356/fw_bcm4356a2_ag_p2p.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4356/nvram_ap6356.txt:system/etc/wifi/4356/nvram_ap6356.txt
+PRODUCT_COPY_FILES += device/amlogic/p200/wifi/config.txt:system/etc/wifi/4356/config.txt
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4354/fw_bcm4354a1_ag.bin:system/etc/wifi/4354/fw_bcm4354a1_ag.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4354/fw_bcm4354a1_ag_apsta.bin:system/etc/wifi/4354/fw_bcm4354a1_ag_apsta.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4354/fw_bcm4354a1_ag_p2p.bin:system/etc/wifi/4354/fw_bcm4354a1_ag_p2p.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/4354/nvram_ap6354.txt:system/etc/wifi/4354/nvram_ap6354.txt
+PRODUCT_COPY_FILES += device/amlogic/p200/wifi/config.txt:system/etc/wifi/4354/config.txt
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/43458/fw_bcm43455c0_ag.bin:system/etc/wifi/43458/fw_bcm43455c0_ag.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/43458/fw_bcm43455c0_ag_apsta.bin:system/etc/wifi/43458/fw_bcm43455c0_ag_apsta.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/43458/fw_bcm43455c0_ag_p2p.bin:system/etc/wifi/43458/fw_bcm43455c0_ag_p2p.bin
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/bcm_ampak/config/43458/nvram_43458.txt:system/etc/wifi/43458/nvram_43458.txt
+PRODUCT_COPY_FILES += device/amlogic/p200/wifi/config.txt:system/etc/wifi/43458/config.txt
+PRODUCT_COPY_FILES += device/amlogic/common/init.amlogic.wifi.rc:root/init.amlogic.wifi.rc
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/multi_wifi/config/bcm_supplicant.conf:system/etc/wifi/bcm_supplicant.conf
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/multi_wifi/config/bcm_supplicant_overlay.conf:system/etc/wifi/bcm_supplicant_overlay.conf
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/multi_wifi/config/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/multi_wifi/config/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/multi_wifi/config/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf
 endif

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Setting default IME config-->
+    <string name="config_defaultIME">com.amlogic.inputmethod.remote/.RemoteIME</string>
+
+</resources>

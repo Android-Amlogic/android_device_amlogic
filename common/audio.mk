@@ -18,18 +18,19 @@ PRODUCT_PACKAGES += \
     audio_policy.default \
     audio.primary.amlogic \
     audio.hdmi.amlogic \
+    audio.r_submix.default \
     acoustics.default \
     audio_firmware
 
 
-PRODUCT_COPY_FILES += \
-    $(TARGET_PRODUCT_DIR)/audio_policy.conf:system/etc/audio_policy.conf \
-    $(TARGET_PRODUCT_DIR)/audio_effects.conf:system/etc/audio_effects.conf
+#PRODUCT_COPY_FILES += \
+#    $(TARGET_PRODUCT_DIR)/audio_policy.conf:system/etc/audio_policy.conf \
+#    $(TARGET_PRODUCT_DIR)/audio_effects.conf:system/etc/audio_effects.conf
 
 #arm audio decoder lib
-soft_adec_libs := $(shell ls packages/amlogic/LibPlayer/amadec/acodec_lib)
+soft_adec_libs := $(shell ls vendor/amlogic/frameworks/av/LibPlayer/amadec/acodec_lib)
 PRODUCT_COPY_FILES += $(foreach file, $(soft_adec_libs), \
-        packages/amlogic/LibPlayer/amadec/acodec_lib/$(file):system/lib/$(file))
+        vendor/amlogic/frameworks/av/LibPlayer/amadec/acodec_lib_50/$(file):system/lib/$(file))
         
 #audio data ko 
 PRODUCT_COPY_FILES += device/amlogic/common/audio/audio_data.ko:system/lib/audio_data.ko        

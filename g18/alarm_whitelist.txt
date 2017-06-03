@@ -1,2 +1,0 @@
-com.farcore.AutoSuspend
-ccc71.bmw.pro

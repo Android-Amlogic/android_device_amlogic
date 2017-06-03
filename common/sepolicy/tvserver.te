@@ -1,0 +1,38 @@
+type tvserver, domain;
+type tvserver_exec, exec_type, file_type;
+
+init_daemon_domain(tvserver)
+
+allow tvserver shell_exec:file rx_file_perms;
+allow tvserver system_file:file execute_no_trans;
+allow tvserver param_file:dir { write add_name remove_name };
+allow tvserver param_file:file { create open getattr lock unlink setattr };
+allow tvserver tvserver_service:service_manager add;
+allow tvserver tvserver_exec:file { entrypoint read };
+allow tvserver audio_device:dir  { search };
+allow tvserver audio_device:chr_file  { read write open ioctl };
+allow tvserver video_device:chr_file  { read write open ioctl };
+allow tvserver dvb_device:chr_file { read write open ioctl };
+allow tvserver uio_device:chr_file rw_file_perms;
+allow tvserver block_device:dir search;
+allow tvserver block_device:blk_file { read write open ioctl getattr };
+allow tvserver input_device:dir search;
+allow tvserver input_device:chr_file { read write open ioctl };
+allow tvserver sysfs:file write;
+allow tvserver sysfs_xbmc:file { open read write getattr };
+allow tvserver property_socket:sock_file write;
+allow tvserver init:unix_stream_socket connectto;
+allow tvserver mediaserver:fd { use };
+allow tvserver { mediaserver system_app system_control }:binder { call transfer };
+allow mediaserver tvserver:binder { call transfer };
+allow system_app tvserver:binder { call transfer };
+allow system_control tvserver:binder { call transfer };
+allow system_app default_prop:property_service set;
+allow tvserver hci_attach_dev:chr_file { read write open ioctl };
+allow tvserver { ctl_default_prop ctl_bootanim_prop media_prop system_prop default_prop uboot_prop powerctl_prop }:property_service set;
+
+allow tvserver self:process execmem;
+allow tvserver self:capability dac_override;
+
+binder_use(tvserver);
+binder_call(tvserver, system_server)

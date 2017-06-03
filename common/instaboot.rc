@@ -1,0 +1,15 @@
+on early-init
+    loglevel 7
+
+    insmod /boot/aml_nftl_dev.ko
+    insmod /boot/instaboot.ko
+    mkdir /system
+    start ueventd
+    mount ext4 /dev/block/system /system wait ro noatime nodiratime noauto_da_alloc
+    insmod /system/lib/instaboot.ko
+
+service ueventd /sbin/ueventd
+    class core
+    critical
+    seclabel u:r:ueventd:s0
+

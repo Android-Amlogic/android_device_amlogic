@@ -1,0 +1,7 @@
+system_control                              u:object_r:system_server_service:s0
+subtitle_service                            u:object_r:subtitle_service:s0
+image.player                                u:object_r:imageserver_service:s0
+pppoe                                       u:object_r:system_server_service:s0
+instabootNS                                 u:object_r:instaboot_service:s0
+zygote_proxy                                u:object_r:zygote_proxy_service:s0
+aml.tvserver                                u:object_r:tvserver_service:s0

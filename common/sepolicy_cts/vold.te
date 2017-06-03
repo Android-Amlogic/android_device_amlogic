@@ -1,0 +1,20 @@
+# NTFS
+allow vold self:capability { setgid setuid sys_rawio };
+
+allow vold fuse_device:chr_file rw_file_perms;
+
+allow vold cpuctl_device:dir search;
+
+allow vold device:dir { open read };
+allow vold usb_device:dir { open read search };
+allow vold usb_device:chr_file { open read write ioctl };
+allow vold system_data_file:fifo_file { open read write ioctl };
+allow vold kernel:system { module_request };
+
+domain_auto_trans(vold, vold_ext_exec, vold_ext)
+allow vold vold_ext_exec:file { execute read open execute_no_trans };
+allow vold kernel:system module_request;
+
+#for dig
+allow vold cache_file:file create_file_perms;
+allow vold cache_file:dir create_file_perms;

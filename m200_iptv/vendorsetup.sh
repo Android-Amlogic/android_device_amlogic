@@ -1,3 +1,0 @@
-add_lunch_combo m200_iptv-eng
-add_lunch_combo m200_iptv-user
-add_lunch_combo m200_iptv-userdebug

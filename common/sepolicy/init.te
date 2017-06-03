@@ -1,0 +1,40 @@
+allow init self:capability { sys_module };
+# add system_control service
+domain_trans(init, system_control_exec, system_control)
+domain_auto_trans(init, system_control_exec, system_server)
+
+#allow init imageserver_service:service_manager add;
+domain_trans(init, imageserver_exec, imageserver)
+
+allow init fuse:file { open read write };
+allow init fuse:dir search;
+
+#allow zygote_proxy service
+domain_trans(init, zygote_proxy_exec, zygote_proxy)
+domain_auto_trans(init, zygote_proxy_exec, zygote_proxy)
+
+#allow instaboot service
+domain_trans(init, instaboot_exec, instaboot)
+domain_auto_trans(init, instaboot_exec, instaboot)
+
+#allow tvserver service
+domain_trans(init, tvserver_exec, tvserver)
+domain_auto_trans(init, tvserver_exec, tvserver)
+
+#allow usbpm service
+domain_trans(init, usbpm_exec, usbpm)
+domain_auto_trans(init, usbpm_exec, usbpm)
+
+domain_auto_trans(init, tvcp_exec, tvcp)
+
+allow init vfat:dir rw_dir_perms;
+allow init vfat:file create_file_perms;
+allow init init_shell:process { signull signal };
+
+allow init init:tcp_socket create_stream_socket_perms;
+allow init port:tcp_socket name_bind;
+allow init node:tcp_socket node_bind;
+allow init rootfs:file create_file_perms;
+allow init shell_data_file:file create_file_perms;
+allow init shell_data_file:dir rw_dir_perms;
+allow init kernel:system syslog_read;
