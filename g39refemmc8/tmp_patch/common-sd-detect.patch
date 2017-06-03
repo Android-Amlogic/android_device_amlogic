@@ -1,0 +1,41 @@
+From f8b263c88ef8741eb611aa9ea5e9cc36af834b8a Mon Sep 17 00:00:00 2001
+From: "ling.fang" <ling.fang@amlogic.com>
+Date: Mon, 6 May 2013 19:51:07 +0800
+Subject: [PATCH] common sd detect
+
+---
+ arch/arm/mach-meson6/sd_pad.c           |    4 ++--
+ drivers/amlogic/cardreader/sd/sd_port.h |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-meson6/sd_pad.c b/arch/arm/mach-meson6/sd_pad.c
+index 7c910ff..ccf8db5 100755
+--- a/arch/arm/mach-meson6/sd_pad.c
++++ b/arch/arm/mach-meson6/sd_pad.c
+@@ -4,8 +4,8 @@
+ #include <plat/regops.h>
+ #include <mach/pinmux.h>
+ 
+-static unsigned sd_backup_input_val = 0;
+-static unsigned sd_backup_output_val = 0;
++static unsigned sd_backup_input_val = 1;
++static unsigned sd_backup_output_val = 1;
+ static unsigned SD_BAKUP_INPUT_REG = (unsigned)&sd_backup_input_val;
+ static unsigned SD_BAKUP_OUTPUT_REG = (unsigned)&sd_backup_output_val;
+ 
+diff --git a/drivers/amlogic/cardreader/sd/sd_port.h b/drivers/amlogic/cardreader/sd/sd_port.h
+index 4a4b3fa..e64c827 100755
+--- a/drivers/amlogic/cardreader/sd/sd_port.h
++++ b/drivers/amlogic/cardreader/sd/sd_port.h
+@@ -243,7 +243,7 @@ extern int i_GPIO_timer;
+ #define sd_get_dat0_3_value()			((*(volatile unsigned int *)SD_DAT_INPUT_REG & SD_DAT0_3_INPUT_MASK) >> SD_DAT_OUTPUT_OFFSET)
+     
+ #define	sd_set_ins_input()				{(*(volatile unsigned int *)SD_INS_OUTPUT_EN_REG) |= SD_INS_OUTPUT_EN_MASK; for(i_GPIO_timer=0;i_GPIO_timer<15;i_GPIO_timer++);}
+-#define sd_get_ins_value()				((*(volatile unsigned int *)SD_INS_INPUT_REG & SD_INS_INPUT_MASK)?1:0)
++#define sd_get_ins_value()				((*(volatile unsigned int *)SD_INS_INPUT_REG & SD_INS_INPUT_MASK)?0:1)
+     
+ //#define SD_MMC_WP_CHECK
+     
+-- 
+1.7.9.5
+

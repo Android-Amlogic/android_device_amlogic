@@ -1,0 +1,70 @@
+on early-init
+    start ueventd
+
+    symlink /initlogo.rle.bak /initlogo.rle
+    write /sys/class/graphics/fb0/blank 0
+    write /sys/class/graphics/fb1/blank 1
+
+on init
+    sysclktz 0
+    loglevel 7
+
+    export PATH /sbin:/system/sbin:/system/bin:/system/xbin
+    export LD_LIBRARY_PATH /system/lib
+    export ANDROID_BOOTLOGO 1
+    export ANDROID_ROOT /system
+    export ANDROID_ASSETS /system/app
+    export ANDROID_DATA /data
+    export EXTERNAL_STORAGE /sdcard
+
+    symlink /system/etc /etc
+
+    mkdir /system
+    mkdir /data
+    mkdir /cache
+    mount /tmp /tmp tmpfs
+
+on boot
+
+    ifup lo
+    hostname localhost
+    domainname localdomain
+
+    # Disable suspend
+    write /sys/power/wake_lock true
+
+    #fix@letv	
+ 		chown system system /sys/class/video2/screen_mode
+    chmod 666 /sys/class/video2/screen_mode
+    chown system system /sys/class/audiodsp/clone_frame_scale_width
+    chmod 666 /sys/module/amvideo2/parameters/clone_frame_scale_width
+		chown system system /sys/class/display2/mode
+    chmod 666 /sys/class/display2/mode
+    chmod 0666 /sys/class/ethernet/linkspeed
+		chown system system /sys/class/ethernet/linkspeed
+    #endif
+    class_start default
+	
+# patch to set screen size
+service display /sbin/sh /sbin/set_display_mode.sh 720p
+    oneshot
+
+service ueventd /sbin/ueventd
+    critical
+
+service remotecontrol /sbin/remotecfg /etc/remote.conf
+    oneshot
+
+service console /sbin/sh
+    console
+
+service recovery /sbin/recovery
+
+service adbd /sbin/adbd
+    disabled
+
+on property:persist.service.adb.enable=1
+    start adbd
+
+on property:persist.service.adb.enable=0
+    stop adbd

@@ -1,0 +1,3 @@
+add_lunch_combo g39refemmc10-eng
+add_lunch_combo g39refemmc10-user
+add_lunch_combo g39refemmc10-userdebug

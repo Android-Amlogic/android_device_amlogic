@@ -1,0 +1,34 @@
+<mixer>
+    <ctl name="Speaker Playback Volume" value="33" />
+    <ctl name="HP Playback Volume" value="31" />
+    <ctl name="MIC1 Boost" value="4" />
+    <ctl name="MIC2 Boost" value="0" />
+    
+  <path name="speaker">
+    <ctl name="SPKMIXR Mixer DACR Playback Switch" value="1" />
+    <ctl name="SPKMIXL Mixer DACL Playback Switch" value="1" />
+    <ctl name="Right SPKVOL Mux" value="SPKMIXR" />
+    <ctl name="Left SPKVOL Mux" value="SPKMIXL" />
+    <ctl name="SPOLMIX Mixer SPKVOLL Playback Switch" value="1" />
+    <ctl name="SPOLMIX Mixer SPKVOLR Playback Switch" value="1" />
+    <ctl name="SPOR Mux" value="SPORMIX" />
+    <ctl name="SPOL Mux" value="SPOLMIX" />
+    <ctl name="HP Playback Volume" value="0" />
+  </path>
+
+  <path name="headphone">
+    <ctl name="HPL Mux" value="1" />
+    <ctl name="HPR Mux" value="1" />
+    <ctl name="Speaker Playback Volume" value="0" />
+  </path>
+
+  <path name="main_mic">
+    <ctl name="RECMIXL Mixer MIC1_BST1 Capture Switch" value="1" />
+    <ctl name="MIC1 Boost" value="4" />
+  </path>
+
+  <path name="headset-mic">
+    <ctl name="RECMIXR Mixer MIC2_BST1 Capture Switch" value="1" />
+    <ctl name="MIC2 Boost" value="3" />
+  </path>
+</mixer>

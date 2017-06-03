@@ -1,0 +1,12 @@
+diff --git a/arch/arm/mach-meson6/power_suspend.c b/arch/arm/mach-meson6/power_suspend.c
+index d5b9b614..d738050 100755
+--- a/arch/arm/mach-meson6/power_suspend.c
++++ b/arch/arm/mach-meson6/power_suspend.c
+@@ -95,6 +95,7 @@ int meson_power_suspend(void)
+ #ifdef CONFIG_SUSPEND_WATCHDOG
+ 	DISABLE_SUSPEND_WATCHDOG;
+ #endif
++	aml_set_reg32_bits(AOBUS_REG_ADDR(0x24), 0, 31, 1); // set TEST_n pin L for sys_led off
+ 	printk("power down cpu --\n");
+ 	pwrtest_entry(APPF_POWER_DOWN_CPU,0,0,APPF_SAVE_PMU|APPF_SAVE_VFP|APPF_SAVE_L2);
+ #ifdef CONFIG_SUSPEND_WATCHDOG

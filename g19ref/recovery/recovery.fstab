@@ -1,0 +1,13 @@
+# mount point	fstype		device			device2
+/bootloader     mtd		bootloader
+/ubootenv       mtd		ubootenv
+/logo           mtd		logo
+/recovery       mtd		recovery
+/boot           mtd		boot
+/boot1          mtd		boot1
+/system         ext4		/dev/block/system
+/system1        ext4		/dev/block/system1
+/cache          ext4		/dev/block/cache
+/data           ext4		/dev/block/userdata
+/sdcard         vfat		/dev/block/cardblksd#	/dev/block/mmcblk0p#
+/udisk          vfat            /dev/block/sda#

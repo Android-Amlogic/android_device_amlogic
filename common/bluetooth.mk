@@ -1,0 +1,132 @@
+#
+# Copyright (C) 2012 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#Support modules:
+#   bcm40183, AP6210, AP6476, AP6330
+
+ifeq ($(BOARD_HAVE_BLUETOOTH),true)
+PRODUCT_PACKAGES += Bluetooth \
+    bt_vendor.conf \
+    bt_stack.conf \
+    bt_did.conf \
+    auto_pair_devlist.conf \
+    libbt-hci \
+    bluetooth.default \
+    audio.a2dp.default \
+    libbt-client-api \
+    com.broadcom.bt \
+    com.broadcom.bt.xml
+
+PRODUCT_COPY_FILES += \
+    system/bluetooth/data/auto_pairing.conf:system/etc/bluetooth/auto_pairing.conf \
+    system/bluetooth/data/blacklist.conf:system/etc/bluetooth/blacklist.conf
+
+ifneq ($(wildcard $(TARGET_PRODUCT_DIR)/bluetooth),)
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(TARGET_PRODUCT_DIR)/bluetooth
+endif
+
+endif
+
+################################################################################## bcm40183
+ifeq ($(BLUETOOTH_MODULE),bcm40183)
+
+BOARD_HAVE_BLUETOOTH_BCM := true
+
+PRODUCT_COPY_FILES += device/amlogic/common/tools/BCM40183B2_26M.hcd:system/etc/bluetooth/BCM4330.hcd
+
+PRODUCT_PACKAGES += libbt-vendor
+
+ifeq ($(BLUETOOTH_USE_BPLUS), true)
+ifeq ($(BCM_BLUETOOTH_LPM_ENABLE), true)
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor_lpm.conf:system/etc/bluetooth/bt_vendor.conf
+else
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf
+endif
+endif
+endif
+################################################################################## AP6210
+ifeq ($(BLUETOOTH_MODULE),AP6210)
+
+BOARD_HAVE_BLUETOOTH_BCM := true
+
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/AP6xxx/AP6210/BT/bcm20710a1.hcd:system/etc/bluetooth/BCM20702.hcd
+
+PRODUCT_PACKAGES += libbt-vendor
+
+ifeq ($(BLUETOOTH_USE_BPLUS), true)
+ifeq ($(BCM_BLUETOOTH_LPM_ENABLE), true)
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor_AP6210_lpm.conf:system/etc/bluetooth/bt_vendor.conf
+else
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor_AP6210.conf:system/etc/bluetooth/bt_vendor.conf
+endif
+endif
+endif
+################################################################################## AP6476
+ifeq ($(BLUETOOTH_MODULE),AP6476)
+
+BOARD_HAVE_BLUETOOTH_BCM := true
+
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/AP6xxx/AP6476/GPS/bcm2076b1.hcd:system/etc/bluetooth/BCM2076.hcd
+
+PRODUCT_PACKAGES += libbt-vendor
+
+ifeq ($(BLUETOOTH_USE_BPLUS), true)
+ifeq ($(BCM_BLUETOOTH_LPM_ENABLE), true)
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor_AP6476_lpm.conf:system/etc/bluetooth/bt_vendor.conf
+else
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor_AP6476.conf:system/etc/bluetooth/bt_vendor.conf
+endif
+endif
+# @S add. 20140721
+# PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_stack.conf:system/etc/bluetooth/bt_stack.conf
+endif
+################################################################################## AP6330
+ifeq ($(BLUETOOTH_MODULE),AP6330)
+
+BOARD_HAVE_BLUETOOTH_BCM := true
+
+PRODUCT_COPY_FILES += hardware/amlogic/wifi/AP6xxx/AP6330/BT/bcm40183b2.hcd:system/etc/bluetooth/BCM4330.hcd
+
+PRODUCT_PACKAGES += libbt-vendor
+
+ifeq ($(BLUETOOTH_USE_BPLUS), true)
+ifeq ($(BCM_BLUETOOTH_LPM_ENABLE), true)
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor_lpm.conf:system/etc/bluetooth/bt_vendor.conf
+else
+    PRODUCT_COPY_FILES += device/amlogic/common/bplus/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf
+endif
+endif
+endif
+
+ifeq ($(BLUETOOTH_USE_BPLUS), true)
+# BPlus
+PRODUCT_COPY_FILES += \
+    device/amlogic/common/bplus/bplus.default.so:system/lib/hw/bplus.default.so
+
+PRODUCT_COPY_FILES += \
+    device/amlogic/common/bplus/iop_bt.db:system/etc/bluetooth/iop_bt.db \
+    device/amlogic/common/bplus/bt_did.conf:system/etc/bluetooth/bt_did.conf 
+
+PRODUCT_PACKAGES += libbt_cust \
+    leexplorer
+endif
+
+ifeq ($(BLUETOOTH_MODULE),mt6622)
+#BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR=device/common/bluetooth
+BOARD_HAVE_BLUETOOTH_MTK := true
+PRODUCT_PACKAGES += libbluetooth_mtk \
+   									MTK_MT6622_E2_Patch.nb0		
+endif

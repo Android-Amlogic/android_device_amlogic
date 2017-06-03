@@ -1,0 +1,3 @@
+add_lunch_combo g24ref19n_ap6476-eng
+add_lunch_combo g24ref19n_ap6476-user
+add_lunch_combo g24ref19n_ap6476-userdebug

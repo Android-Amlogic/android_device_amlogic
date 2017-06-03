@@ -1,0 +1,16 @@
+<mixer>
+  <path name="speaker">
+      <!-- Todo: add ctl --> 
+
+  </path>
+
+  <path name="headphone">
+  </path>
+
+  <path name="main_mic">
+  </path>
+
+  <path name="headset-mic">
+
+  </path>
+</mixer>

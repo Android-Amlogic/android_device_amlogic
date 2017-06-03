@@ -1,0 +1,739 @@
+From 3c25091efc1382c01f2a1a963aa147733dede6d8 Mon Sep 17 00:00:00 2001
+From: xiajinlin <jinlin.xia@amlogic.com>
+Date: Fri, 7 Jun 2013 10:49:46 +0800
+Subject: [PATCH] merge letv modify
+
+---
+ drivers/amlogic/amports/amstream.c           |    9 +++--
+ drivers/amlogic/amports/ptsserv.c            |    7 ++--
+ drivers/amlogic/amports/video.c              |   14 ++++++++
+ drivers/amlogic/amports/vreal.c              |   22 ++++++++++--
+ drivers/amlogic/audiodsp/audiodsp_module.c   |    8 ++---
+ drivers/amlogic/audiodsp/dsp_control.c       |    4 +--
+ drivers/amlogic/audiodsp/dsp_control.h       |    2 +-
+ drivers/amlogic/audiodsp/dsp_microcode.c     |   50 +++++++++++++++++++++-----
+ drivers/amlogic/audiodsp/dsp_microcode.h     |    2 +-
+ drivers/amlogic/display/vout2/tvregs.h       |   14 +++++---
+ drivers/amlogic/ethernet/am_net8218.c        |   15 ++++++++
+ drivers/amlogic/hdmi/hdmi_tx/hdmi_tx.c       |   10 ++++++
+ drivers/amlogic/hdmi/hdmi_tx/m6/hdmi_tx_hw.c |    4 ++-
+ drivers/amlogic/input/keyboard/key_input.c   |    7 ++--
+ drivers/amlogic/rtc/aml_rtc.c                |    4 ++-
+ include/linux/amports/amstream.h             |    3 ++
+ include/linux/amports/tsync.h                |    7 ++--
+ include/linux/inet.h                         |   29 +++++++++++++++
+ kernel/power/main.c                          |    1 +
+ net/ipv4/af_inet.c                           |   30 ++++++++++++++--
+ sound/soc/aml/aml_audio_hw.c                 |   32 ++++++++---------
+ 21 files changed, 221 insertions(+), 53 deletions(-)
+ mode change 100644 => 100755 include/linux/inet.h
+ mode change 100644 => 100755 net/ipv4/af_inet.c
+
+diff --git a/drivers/amlogic/amports/amstream.c b/drivers/amlogic/amports/amstream.c
+index 2852072..342fef3 100755
+--- a/drivers/amlogic/amports/amstream.c
++++ b/drivers/amlogic/amports/amstream.c
+@@ -98,8 +98,8 @@ void debug_file_write(const char __user *buf, size_t count)
+ #endif
+ 
+ #define DEFAULT_VIDEO_BUFFER_SIZE       (1024*1024*3)
+-#define DEFAULT_AUDIO_BUFFER_SIZE       (1024*384)
+-#define DEFAULT_SUBTITLE_BUFFER_SIZE     (1024*256)
++#define DEFAULT_AUDIO_BUFFER_SIZE       (1024*384*2)
++#define DEFAULT_SUBTITLE_BUFFER_SIZE     (1024*1024*4)
+ #if 0
+ static ulong vbuf_start;
+ module_param(vbuf_start, ulong, 0644);
+@@ -1472,6 +1472,11 @@ static long amstream_ioctl(struct file *file,
+ 			put_user(0,(int *)arg);
+         break;		
+ 		}
++       //fix@letv    
++	case AMSTREAM_IOC_SET_SYNC_INIT:
++		tsync_avevent(TSYNC_INIT, arg);
++		break;
++	//endfix 		
+     default:
+         r = -ENOIOCTLCMD;
+         break;
+diff --git a/drivers/amlogic/amports/ptsserv.c b/drivers/amlogic/amports/ptsserv.c
+index b587417..610d857 100755
+--- a/drivers/amlogic/amports/ptsserv.c
++++ b/drivers/amlogic/amports/ptsserv.c
+@@ -10,7 +10,7 @@
+ 
+ #include "vdec_reg.h"
+ 
+-#define VIDEO_REC_SIZE  4096
++#define VIDEO_REC_SIZE  8192
+ #define AUDIO_REC_SIZE  8192
+ #define VIDEO_LOOKUP_RESOLUTION 2500
+ #define AUDIO_LOOKUP_RESOLUTION 1024
+@@ -665,6 +665,9 @@ error_alloc_pages:
+ 
+ int pts_start(u8 type)
+ {
++		//fix@letv
++		tsync_mode_reinit();
++		//endfix
+     ulong flags;
+     pts_table_t *pTable;
+ 
+@@ -765,7 +768,7 @@ int pts_stop(u8 type)
+         if (type == PTS_TYPE_AUDIO) {
+             timestamp_apts_set(-1);
+         }
+-		tsync_mode_reinit();
++				//fix@letv tsync_mode_reinit();
+         return 0;
+ 
+     } else {
+diff --git a/drivers/amlogic/amports/video.c b/drivers/amlogic/amports/video.c
+index 37b1d13..29fdaff 100755
+--- a/drivers/amlogic/amports/video.c
++++ b/drivers/amlogic/amports/video.c
+@@ -3569,6 +3569,14 @@ static struct class amvideo_class = {
+ 
+ static struct device *amvideo_dev;
+ 
++//fix@letv
++int adjust_vsync_pts_inc(int val){
++    printk("Vsync pts inc(before): %d\n", val);
++    int newval = (val * (1000-0))/1000;
++    printk("Vsync pts inc(after): %d\n", newval);
++    return newval;
++}
++//endfix
+ int vout_notify_callback(struct notifier_block *block, unsigned long cmd , void *para)
+ {
+     const vinfo_t *info;
+@@ -3587,6 +3595,9 @@ int vout_notify_callback(struct notifier_block *block, unsigned long cmd , void
+   	vinfo = info;
+ 	/* pre-calculate vsync_pts_inc in 90k unit */
+     	vsync_pts_inc = 90000 * vinfo->sync_duration_den / vinfo->sync_duration_num;
++    	//fix@letv
++    	vsync_pts_inc = adjust_vsync_pts_inc(vsync_pts_inc);
++    	//endfix
+ 	spin_unlock_irqrestore(&lock, flags);
+ 	break;
+ 	case VOUT_EVENT_OSD_PREBLEND_ENABLE:
+@@ -3664,6 +3675,9 @@ static void vout_hook(void)
+ 
+     if (vinfo) {
+         vsync_pts_inc = 90000 * vinfo->sync_duration_den / vinfo->sync_duration_num;
++        //fix@letv
++				vsync_pts_inc = adjust_vsync_pts_inc(vsync_pts_inc);
++				//endfix
+     }
+ 
+ #ifdef CONFIG_AM_VIDEO_LOG
+diff --git a/drivers/amlogic/amports/vreal.c b/drivers/amlogic/amports/vreal.c
+index 64dff58..bd2470f 100755
+--- a/drivers/amlogic/amports/vreal.c
++++ b/drivers/amlogic/amports/vreal.c
+@@ -152,7 +152,9 @@ static u32 real_recycle_rd;
+ static u32 real_recycle_wr;
+ 
+ static u32 fatal_flag;
+-
++//fix@letv
++static u32 timeout_count;
++//endfix
+ static DEFINE_SPINLOCK(lock);
+ 
+ static unsigned short pic_sz_tbl[12] __attribute__((aligned(32)));
+@@ -439,7 +441,18 @@ static void vreal_put_timer_func(unsigned long arg)
+ #ifndef HANDLE_REAL_IRQ
+     vreal_isr();
+ #endif
+-
++	//fix@letv
++    if (READ_VREG(AV_SCRATCH_B)) {
++        timeout_count++;
++        if (timeout_count == 5) {
++            printk("0x307: 0x%x, AV_SCRATCH_B %d\n", READ_VREG(0x307),  READ_VREG(AV_SCRATCH_B));
++            fatal_flag = PARSER_FATAL_ERROR;
++        }
++    } else {
++        timeout_count = 0;
++    }
++	//endfix
++	
+     if (putting_ptr != put_ptr) {
+         u32 index = vfpool_idx[put_ptr];
+ 
+@@ -513,7 +526,7 @@ static void vreal_canvas_init(void)
+         decbuf_size = 0x300000;
+     }
+ 
+-    if(is_vpp_postblend()){
++    if (READ_MPEG_REG(VPP_MISC) & VPP_VD1_POSTBLEND) {
+         canvas_t cur_canvas;
+ 
+         canvas_read((READ_MPEG_REG(VD1_IF0_CANVAS0) & 0xff), &cur_canvas);
+@@ -666,6 +679,9 @@ static void vreal_local_init(void)
+     pic_sz_tbl_map = 0;
+ 
+     fatal_flag = 0;
++	//fix@letv
++    timeout_count = 0;
++	//endfix
+ }
+ 
+ static void load_block_data(unsigned int dest, unsigned int count)
+diff --git a/drivers/amlogic/audiodsp/audiodsp_module.c b/drivers/amlogic/audiodsp/audiodsp_module.c
+index 792c3f7..f7b4fa4 100755
+--- a/drivers/amlogic/audiodsp/audiodsp_module.c
++++ b/drivers/amlogic/audiodsp/audiodsp_module.c
+@@ -124,7 +124,7 @@ static void audiodsp_allow_sleep(void)
+     //wake_unlock(&priv->wakelock);
+ }
+ 
+-int audiodsp_start(void)
++int audiodsp_start(unsigned long args)
+ {
+ 	struct audiodsp_priv *priv=audiodsp_privdata();
+ 	struct audiodsp_microcode *pmcode;
+@@ -145,7 +145,7 @@ int audiodsp_start(void)
+ 
+ 	stop_audiodsp_monitor(priv);
+ 	dsp_stop(priv);
+-	ret=dsp_start(priv,pmcode);
++	ret=dsp_start(priv,pmcode,args);
+ 	if(ret==0){
+  		start_audiodsp_monitor(priv);
+ 
+@@ -301,7 +301,7 @@ static long audiodsp_ioctl(struct file *file, unsigned int cmd,
+ 				}
+ 			else
+ 				{
+-				ret=audiodsp_start();
++				ret=audiodsp_start(args);
+ 				}
+ 			break;
+ 		case AUDIODSP_STOP:
+@@ -605,7 +605,7 @@ ssize_t audiodsp_write(struct file * file, const char __user * ubuf, size_t size
+ 								MCODEC_FMT_COOK,
+ 								"audiodsp_codec_cook.bin");
+ 	priv->stream_fmt=MCODEC_FMT_COOK;
+-	audiodsp_start();
++	audiodsp_start(0);
+ 	dsp_codec_start(priv);
+ 	//dsp_codec_stop(priv);
+ 	
+diff --git a/drivers/amlogic/audiodsp/dsp_control.c b/drivers/amlogic/audiodsp/dsp_control.c
+index a5bfb3b..5d685cd 100755
+--- a/drivers/amlogic/audiodsp/dsp_control.c
++++ b/drivers/amlogic/audiodsp/dsp_control.c
+@@ -247,7 +247,7 @@ static inline int dsp_set_stream_buffer( struct audiodsp_priv *priv)
+ }
+ 
+ 
+- int dsp_start( struct audiodsp_priv *priv, struct audiodsp_microcode *mcode)
++ int dsp_start( struct audiodsp_priv *priv, struct audiodsp_microcode *mcode,unsigned long args)
+  {
+ 	int i;
+ 	int res;
+@@ -255,7 +255,7 @@ static inline int dsp_set_stream_buffer( struct audiodsp_priv *priv)
+ 	halt_dsp(priv);
+ 	if(priv->stream_fmt!=priv->last_stream_fmt) // remove the trick, bug fixed on dsp side
+ 		{
+-		if(audiodsp_microcode_load(audiodsp_privdata(),mcode)!=0)
++		if(audiodsp_microcode_load(audiodsp_privdata(),mcode,args)!=0)
+ 			{
+ 			printk("load microcode error\n");
+ 			res=-1;
+diff --git a/drivers/amlogic/audiodsp/dsp_control.h b/drivers/amlogic/audiodsp/dsp_control.h
+index 6009f3d..26b1f61 100755
+--- a/drivers/amlogic/audiodsp/dsp_control.h
++++ b/drivers/amlogic/audiodsp/dsp_control.h
+@@ -9,7 +9,7 @@
+ 
+ void halt_dsp( struct audiodsp_priv *priv);
+ void reset_dsp( struct audiodsp_priv *priv);
+- int dsp_start( struct audiodsp_priv *priv, struct audiodsp_microcode *mcode);
++ int dsp_start( struct audiodsp_priv *priv, struct audiodsp_microcode *mcode,unsigned long args);
+  int dsp_stop( struct audiodsp_priv *priv);
+ 
+ #define AUDIODSP_RESET
+diff --git a/drivers/amlogic/audiodsp/dsp_microcode.c b/drivers/amlogic/audiodsp/dsp_microcode.c
+index fec28e7..764499c 100755
+--- a/drivers/amlogic/audiodsp/dsp_microcode.c
++++ b/drivers/amlogic/audiodsp/dsp_microcode.c
+@@ -71,22 +71,55 @@ static struct audiodsp_microcode *  audiodsp_find_mcode_by_name(struct audiodsp_
+ 	return pmcode;
+ }
+ 
+- int audiodsp_microcode_load(struct audiodsp_priv*priv,struct audiodsp_microcode *pmcode)
++//-------------------------------
++typedef struct firmware_buf_para
++{
++  unsigned char *buffer;
++  unsigned int  buffer_size;
++
++}firmware_buf_para_t;
++
++#define max_firmware_size (1024*1024)
++char firmware_buf[max_firmware_size]={0};//now max firmware size: 671628 bytes
++
++//-------------------------------
++ int audiodsp_microcode_load(struct audiodsp_priv*priv,struct audiodsp_microcode *pmcode,unsigned long args)
+ {
+ 	
+ 	const struct firmware *firmware;
++	struct firmware  firmware_instance;
++	int load_firmware_from_user_flag=0;
+ 	int err=0;
+     unsigned dsp_code_text_start = 0;
++        firmware_buf_para_t *firmware_from_user=NULL;
+ 	priv->micro_dev = device_create(priv->class,
+ 					    NULL, MKDEV(AUDIODSP_MAJOR, 1),
+ 					    NULL, "audiodsp1");
+ 	if(priv->micro_dev ==NULL)
+ 		return -1;
+-	if((err=request_firmware(&firmware,pmcode->file_name, priv->micro_dev))<0)
+-		{
+-		DSP_PRNT("can't load the %s,err=%d\n",pmcode->file_name,err);
+-		goto error1;
+-		}
++	//---------------------------------------
++	firmware_from_user=(firmware_buf_para_t*)args;
++	if(firmware_from_user!=NULL)
++	{   
++		if(firmware_from_user->buffer_size>0){
++           copy_from_user(firmware_buf,firmware_from_user->buffer,firmware_from_user->buffer_size);
++	       firmware_instance.data=firmware_buf;
++		   firmware_instance.size=firmware_from_user->buffer_size;
++		   firmware=&firmware_instance;
++		   load_firmware_from_user_flag=1;
++		   DSP_PRNT("load firmware frome userspace: loadsize=%d \n",firmware_instance.size);
++	    }
++	}
++	
++	if(load_firmware_from_user_flag==0)
++	{   DSP_PRNT("load firmware from userspace failed: switch to load it by calling request_firmware() in kernel\n");
++	    if((err=request_firmware(&firmware,pmcode->file_name, priv->micro_dev))<0)
++	    {
++		   DSP_PRNT("can't load the %s,err=%d\n",pmcode->file_name,err);
++		   goto error1;
++	    }
++	}
++	//----------------------------------------
+ 	if(firmware->size>priv->code_mem_size)
+ 		{
+ 		DSP_PRNT("not enough memory size for audiodsp code\n");
+@@ -95,7 +128,7 @@ static struct audiodsp_microcode *  audiodsp_find_mcode_by_name(struct audiodsp_
+ 		}
+     if(priv->dsp_is_started)
+ #ifndef AUDIODSP_RESET
+-        dsp_code_text_start = 0x1000;//after dsp is running,only load from the text section of the microcode.
++        dsp_code_text_start = 0x800;//after dsp is running,only load from the text section of the microcode.
+ #else
+ 	 dsp_code_text_start = 0;
+ #endif /* AUDIODSP_RESET */
+@@ -106,7 +139,8 @@ static struct audiodsp_microcode *  audiodsp_find_mcode_by_name(struct audiodsp_
+ 	pmcode->code_size=firmware->size;
+ 	DSP_PRNT("load mcode size=%d\n,load addr 0x%lx mcode name %s",firmware->size,pmcode->code_start_addr,pmcode->file_name);
+ release:	
+-	release_firmware(firmware);
++	if(load_firmware_from_user_flag==0)
++	    release_firmware(firmware);
+ 
+ error1:
+ 	device_destroy(priv->class, MKDEV(AUDIODSP_MAJOR, 1));
+diff --git a/drivers/amlogic/audiodsp/dsp_microcode.h b/drivers/amlogic/audiodsp/dsp_microcode.h
+index 5aa3da7..25baf49 100755
+--- a/drivers/amlogic/audiodsp/dsp_microcode.h
++++ b/drivers/amlogic/audiodsp/dsp_microcode.h
+@@ -16,7 +16,7 @@ struct audiodsp_microcode
+ 
+ extern int audiodsp_microcode_register(struct audiodsp_priv*priv,int fmt,char *filename);
+ extern struct audiodsp_microcode *  audiodsp_find_supoort_mcode(struct audiodsp_priv*priv,int fmt);
+-extern int audiodsp_microcode_load(struct audiodsp_priv*priv,struct audiodsp_microcode *pmcode);
++extern int audiodsp_microcode_load(struct audiodsp_priv*priv,struct audiodsp_microcode *pmcode,unsigned long args);
+ int audiodsp_microcode_free(struct audiodsp_priv*priv);
+  #endif
+ 
+diff --git a/drivers/amlogic/display/vout2/tvregs.h b/drivers/amlogic/display/vout2/tvregs.h
+index 11524eb..8f665a8 100755
+--- a/drivers/amlogic/display/vout2/tvregs.h
++++ b/drivers/amlogic/display/vout2/tvregs.h
+@@ -295,6 +295,7 @@ static const reg_t tvregs_480cvbs[] = {
+     {ENCI_DACSEL_0,                0x1111 },
+     {ENCI_DACSEL_1,                0x11   },
+     {ENCI_VIDEO_EN,                1,     },
++    {VENC_VDAC_SETTING,	           0x5    },
+     {MREG_END_MARKER,              0      }
+ };
+ 
+@@ -427,6 +428,7 @@ static const reg_t tvregs_480cvbs[] = {
+     {ENCI_VIDEO_SAT,		 	 0xfe	},
+     {VENC_VDAC_DAC3_FILT_CTRL0,	 0x1	},
+     {VENC_VDAC_DAC3_FILT_CTRL1,	 0xf850	},
++	{VENC_VDAC_SETTING£¬	   0x5    },
+     {MREG_END_MARKER,            0      }
+ };
+ #endif
+@@ -571,7 +573,7 @@ static const reg_t tvregs_576cvbs[] = {
+     {ENCI_VIDEO_SCH,                  0x28,      },
+     {ENCI_SYNC_MODE,                  0x07,      },
+     {ENCI_MACV_N0,               0,     },
+-    {ENCI_YC_DELAY,                   0x353,     },
++    {ENCI_YC_DELAY,                   0x373,     },
+     {ENCI_VFIFO2VD_PIXEL_START,       0x010b     },
+     {ENCI_VFIFO2VD_PIXEL_END,         0x06ab     },
+     {ENCI_VFIFO2VD_LINE_TOP_START,    0x0016     },
+@@ -600,7 +602,9 @@ static const reg_t tvregs_576cvbs[] = {
+     {ENCI_DACSEL_0,                   0x1111     },
+     {ENCI_DACSEL_1,                   0x11       },
+     {ENCI_VIDEO_EN,                   1,         },
+-    {MREG_END_MARKER,                 0          }
++    {VENC_VDAC_SETTING,               0x5,       },
++    {VENC_VDAC_DAC1_GAINCTRL, 0x1b    },
++    {MREG_END_MARKER,                 0          },
+ };
+ 
+ #else
+@@ -694,7 +698,7 @@ static const reg_t tvregs_576cvbs[] = {
+     {ENCI_VIDEO_SCH,             0x28,  },
+     {ENCI_SYNC_MODE,             0x07,  },
+     {ENCI_MACV_N0,               0,     },
+-    {ENCI_YC_DELAY,              0x333, },
++    {ENCI_YC_DELAY,              0x373, },
+     {ENCI_VFIFO2VD_PIXEL_START,       0x010b     },
+     {ENCI_VFIFO2VD_PIXEL_END,         0x06ab     },
+     {ENCI_VFIFO2VD_LINE_TOP_START,    0x0016     },
+@@ -736,7 +740,9 @@ static const reg_t tvregs_576cvbs[] = {
+     {VENC_VDAC_DAC3_FILT_CTRL0,	 0x1	},
+     {VENC_VDAC_DAC3_FILT_CTRL1,	 0xfe44	},
+ 	{ENCI_SYNC_ADJ,		 0x8400 },
+-    {MREG_END_MARKER,            0      }
++    {VENC_VDAC_SETTING,     0x5,     },
++    {VENC_VDAC_DAC1_GAINCTRL, 0x1b    },
++    {MREG_END_MARKER,            0      },
+ };
+ #endif
+ 
+diff --git a/drivers/amlogic/ethernet/am_net8218.c b/drivers/amlogic/ethernet/am_net8218.c
+index afb1eff..ae8a320 100755
+--- a/drivers/amlogic/ethernet/am_net8218.c
++++ b/drivers/amlogic/ethernet/am_net8218.c
+@@ -1550,6 +1550,15 @@ static void tx_timeout(struct net_device *dev)
+ 	spin_lock_irq(&np->lock);
+ 	val = mdio_read(dev, np->phys[0], MII_BMSR);
+ 	spin_unlock_irq(&np->lock);
++	running = 0;
++	IO_WRITE32(0, (np->base_addr + ETH_DMA_6_Operation_Mode));
++	IO_WRITE32(0, np->base_addr + ETH_DMA_7_Interrupt_Enable);
++	free_ringdesc(dev);
++	ethernet_reset(dev);
++	val = IO_READ32((np->base_addr + ETH_DMA_6_Operation_Mode));
++	val |= (1 << 1); /*start receive*/
++	IO_WRITE32(val, (np->base_addr + ETH_DMA_6_Operation_Mode));
++	running = 1;
+ 	if (!(val & (BMSR_LSTATUS))) {	//unlink .....
+ 		netif_stop_queue(dev);
+ 		netif_carrier_off(dev);
+@@ -1922,6 +1931,10 @@ static int probe_init(struct net_device *ndev)
+ 		}
+ 	}
+ 
++ 	if(priv->mii == PHY_IC_IP101ALF) {//change clock for ip101
++        	WRITE_CBUS_REG(HHI_ETH_CLK_CNTL, 0x120);
++        }
++
+ 	if (!found) {
+ 		printk("can't find any mii phy device !\n");
+ 		res = -EIO;
+@@ -2541,6 +2554,8 @@ static void get_phy_linkspeed(char *buf)
+ 		full = ((rint) & (1 << 13));
+         break;
+ 	case PHY_IC_IP101ALF:
++		link = mdio_read(np->dev, np->phys[0], 1);
++		linkflag = (link & (1 << 2));
+ 		rint = mdio_read(np->dev, np->phys[0], 0);
+ 		s100 = (rint & (0x1 << 8)) ? 1 : 0;
+ 		rint = mdio_read(np->dev, np->phys[0], 5);
+diff --git a/drivers/amlogic/hdmi/hdmi_tx/hdmi_tx.c b/drivers/amlogic/hdmi/hdmi_tx/hdmi_tx.c
+index b9b9154..74396bc 100755
+--- a/drivers/amlogic/hdmi/hdmi_tx/hdmi_tx.c
++++ b/drivers/amlogic/hdmi/hdmi_tx/hdmi_tx.c
+@@ -1720,6 +1720,11 @@ static int amhdmitx_remove(struct platform_device *pdev)
+ #ifdef CONFIG_PM
+ static int amhdmitx_suspend(struct platform_device *pdev,pm_message_t state)
+ {
++	//fix@letv 20130328 alexwang
++    if(hdmi_pdata){
++        hdmi_pdata->hdmi_5v_ctrl ? hdmi_pdata->hdmi_5v_ctrl(0) : 0;
++    }
++	//endfix
+ #if 0
+     pr_info("amhdmitx: hdmirx_suspend\n");
+     hdmi_pre_set_change_mode();
+@@ -1735,6 +1740,11 @@ static int amhdmitx_suspend(struct platform_device *pdev,pm_message_t state)
+ 
+ static int amhdmitx_resume(struct platform_device *pdev)
+ {
++	//fix@letv 20130328 alexwang
++    if(hdmi_pdata){
++        hdmi_pdata->hdmi_5v_ctrl ? hdmi_pdata->hdmi_5v_ctrl(1) : 0;
++    }
++	//endfix
+ #if 0
+     pr_info("amhdmitx: resume module\n");
+     if(hdmi_pdata){
+diff --git a/drivers/amlogic/hdmi/hdmi_tx/m6/hdmi_tx_hw.c b/drivers/amlogic/hdmi/hdmi_tx/m6/hdmi_tx_hw.c
+index 5062cbc..5345969 100755
+--- a/drivers/amlogic/hdmi/hdmi_tx/m6/hdmi_tx_hw.c
++++ b/drivers/amlogic/hdmi/hdmi_tx/m6/hdmi_tx_hw.c
+@@ -2989,9 +2989,11 @@ static int hdmitx_m3_cntl(hdmitx_dev_t* hdmitx_device, int cmd, unsigned argv)
+         }
+         else{
+             // ENCP bist enable
+-            aml_write_reg32(P_VPP_BLEND_ONECOLOR_CTRL, (0x3 << 24) | 0x008080);    // one bit osd blank enable
++			//fix@letv 20130402 by alexwang
++//            aml_write_reg32(P_VPP_BLEND_ONECOLOR_CTRL, (0x3 << 24) | 0x008080);    // one bit osd blank enable
+         }
+     }
++	//endfix
+     else if(cmd == HDMITX_GET_AUTHENTICATE_STATE){
+         if((hdmi_rd_reg(TX_HDCP_ST_STATUS_3)&0xa0)==0xa0){
+             return 1;
+diff --git a/drivers/amlogic/input/keyboard/key_input.c b/drivers/amlogic/input/keyboard/key_input.c
+index 9866330..1df929a 100755
+--- a/drivers/amlogic/input/keyboard/key_input.c
++++ b/drivers/amlogic/input/keyboard/key_input.c
+@@ -69,7 +69,7 @@
+ #include <amlogic/aml1212.h>
+ #endif
+ 
+-//#define AML_KEYINPUT_DBG
++#define AML_KEYINPUT_DBG
+ #define AML_KEYINPUT_INTR     0
+ #define AML_KEYINPUT_POLLING   2
+ 
+@@ -194,6 +194,7 @@ static void long_press_power_key(struct work_struct *work)
+ 
+ static void keyinput_tasklet(unsigned long data)
+ {
++    printk(KERN_INFO "----------------keyinput_tasklet--------------\n");
+     if (KeyInput->status) {
+         input_report_key(KeyInput->input, KeyInput->pdata->key_code_list[0], 0);
+         input_sync(KeyInput->input);
+@@ -511,9 +512,9 @@ static int key_input_resume(struct platform_device *dev)
+      */
+     if (READ_AOBUS_REG(AO_RTI_STATUS_REG2) == 0x1234abcd) {
+         // power button, not alarm
+-        input_report_key(KeyInput->input, KeyInput->pdata->key_code_list[0], 0);
++        input_report_key(KeyInput->input, KeyInput->pdata->key_code_list[1], 0);
+         input_sync(KeyInput->input);
+-        input_report_key(KeyInput->input, KeyInput->pdata->key_code_list[0], 1);
++        input_report_key(KeyInput->input, KeyInput->pdata->key_code_list[1], 1);
+         input_sync(KeyInput->input);
+ 		//aml_write_reg32(P_AO_RTC_ADDR0, (aml_read_reg32(P_AO_RTC_ADDR0) | (0x0000f000)));
+ 		#ifdef CONFIG_SCREEN_ON_EARLY
+diff --git a/drivers/amlogic/rtc/aml_rtc.c b/drivers/amlogic/rtc/aml_rtc.c
+index 135c4a4..27a8952 100755
+--- a/drivers/amlogic/rtc/aml_rtc.c
++++ b/drivers/amlogic/rtc/aml_rtc.c
+@@ -564,7 +564,9 @@ static int aml_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
+ 		} else
+ 			alarm_data.alarm_sec =  0;
+ 
+-		rtc_set_alarm_aml(dev, &alarm_data);
++		//fix@letv
++		//rtc_set_alarm_aml(dev, &alarm_data);
++		//endfix
+ 	} else {
+ #if MESON_CPU_TYPE >= MESON_CPU_TYPE_MESON6	
+ 		ser_access_write(RTC_GPO_COUNTER_ADDR,0x500000);
+diff --git a/include/linux/amports/amstream.h b/include/linux/amports/amstream.h
+index 4c6101f..ee8c2b1 100755
+--- a/include/linux/amports/amstream.h
++++ b/include/linux/amports/amstream.h
+@@ -141,6 +141,9 @@
+ #define AMSTREAM_IOC_SET_FREERUN_MODE  _IOW(AMSTREAM_IOC_MAGIC, 0x88, unsigned long)
+ #define AMSTREAM_IOC_SET_VSYNC_UPINT   _IOW(AMSTREAM_IOC_MAGIC, 0x89, unsigned long)
+ #define AMSTREAM_IOC_SET_DEMUX  _IOW(AMSTREAM_IOC_MAGIC, 0x90, unsigned long)
++//fix@letv
++#define AMSTREAM_IOC_SET_SYNC_INIT _IOW(AMSTREAM_IOC_MAGIC, 0x91, int)
++//endfix
+ 
+ 
+ 
+diff --git a/include/linux/amports/tsync.h b/include/linux/amports/tsync.h
+index dc56c3f..0e643cd 100755
+--- a/include/linux/amports/tsync.h
++++ b/include/linux/amports/tsync.h
+@@ -38,7 +38,10 @@ typedef enum {
+     AUDIO_RESUME,
+     AUDIO_STOP,
+     AUDIO_TSTAMP_DISCONTINUITY,
+-    AUDIO_PRE_START
++    AUDIO_PRE_START,
++    //fix@letv
++    TSYNC_INIT
++    //endfix
+ } avevent_t;
+ 
+ typedef enum {
+@@ -81,8 +84,6 @@ extern void tsync_set_sync_adiscont_diff(u32 discontinue_diff);
+ extern void tsync_set_sync_vdiscont_diff(u32 discontinue_diff);
+ extern int tsync_set_apts(unsigned pts);
+ 
+-
+-
+ extern void tsync_set_automute_on(int automute_on);
+ 
+ extern int tsync_get_debug_pts_checkin(void);
+diff --git a/include/linux/inet.h b/include/linux/inet.h
+old mode 100644
+new mode 100755
+index 4cca05c..6bde685
+--- a/include/linux/inet.h
++++ b/include/linux/inet.h
+@@ -50,7 +50,36 @@
+  */
+ #define INET_ADDRSTRLEN		(16)
+ #define INET6_ADDRSTRLEN	(48)
++//fix@letv
++enum NW_DBG_ID{
++	DBG_ID_SOCKET = 0,
++	DBG_ID_TCP,
++	DBG_ID_UDP,
++	DBG_ID_RAW,
++	DBG_ID_IP,
++	DBG_ID_NEIGH,
++	DBG_ID_FIB,
++	DBG_ID_DEV,
++	DBG_ID_OUTPUT,
++	DBG_ID_MAX,
++};
+ 
++enum NW_DBG_LEVEL{
++	DBG_LEVEL_NODBG = 0,
++	DBG_LEVEL_ERR,
++	DBG_LEVEL_INFO,
++	DBG_LEVEL_DETAIL,
++};
++
++struct network_dbg {
++	char model_name[32];
++	enum NW_DBG_LEVEL   level;
++};
++
++#define OUTPUT_DBG_DETAIL (network_debugs[DBG_ID_OUTPUT].level >= DBG_LEVEL_DETAIL)
++#define OUTPUT_DBG_INFO (network_debugs[DBG_ID_OUTPUT].level >= DBG_LEVEL_INFO)
++#define OUTPUT_DBG_ERR (network_debugs[DBG_ID_OUTPUT].level >= DBG_LEVEL_ERR)
++//endfix
+ extern __be32 in_aton(const char *str);
+ extern int in4_pton(const char *src, int srclen, u8 *dst, int delim, const char **end);
+ extern int in6_pton(const char *src, int srclen, u8 *dst, int delim, const char **end);
+diff --git a/kernel/power/main.c b/kernel/power/main.c
+index e46b0b7..1abb7bb 100755
+--- a/kernel/power/main.c
++++ b/kernel/power/main.c
+@@ -199,6 +199,7 @@ static ssize_t state_store(struct kobject *kobj, struct kobj_attribute *attr,
+ #ifdef CONFIG_EARLYSUSPEND
+ 		if (state == PM_SUSPEND_ON || valid_state(state)) {
+ 			error = 0;
++                        printk("====state_store:%d\n", state);
+ 			request_suspend_state(state);
+ 		}
+ #else
+diff --git a/net/ipv4/af_inet.c b/net/ipv4/af_inet.c
+old mode 100644
+new mode 100755
+index 4d60f12..7321ac8
+--- a/net/ipv4/af_inet.c
++++ b/net/ipv4/af_inet.c
+@@ -131,7 +131,20 @@ static inline int current_has_network(void)
+ 	return 1;
+ }
+ #endif
+-
++//fix@letv
++struct network_dbg network_debugs[DBG_ID_MAX] = 
++{
++{"SOCKET", DBG_LEVEL_NODBG},
++{"TCP",DBG_LEVEL_NODBG},
++{"UDP",DBG_LEVEL_NODBG},
++{"RAW",DBG_LEVEL_NODBG},
++{"IP",DBG_LEVEL_NODBG},
++{"NEIGH",DBG_LEVEL_NODBG},
++{"FIB",DBG_LEVEL_NODBG},
++{"DEV",DBG_LEVEL_NODBG},
++{"OUTPUT",DBG_LEVEL_NODBG},
++};
++//endfix
+ /* The inetsw table contains everything that inet_create needs to
+  * build a new socket.
+  */
+@@ -1650,7 +1663,20 @@ static struct packet_type ip_packet_type __read_mostly = {
+ 	.gro_receive = inet_gro_receive,
+ 	.gro_complete = inet_gro_complete,
+ };
+-
++//fix@letv
++int g_tcp_tx_cnt = 0;
++int g_tcp_rx_cnt = 0;
++int g_udp_tx_cnt = 0;
++int g_udp_rx_cnt = 0;
++int g_raw_tx_cnt = 0;
++int g_raw_rx_cnt = 0;
++int g_ip_tx_cnt = 0;
++int g_ip_rx_cnt = 0;
++int g_dev_tx_cnt = 0;
++int g_dev_rx_cnt = 0;
++int g_loopback_tx_cnt = 0;
++int g_loopback_rx_cnt = 0;
++//endfix
+ static int __init inet_init(void)
+ {
+ 	struct sk_buff *dummy_skb;
+diff --git a/sound/soc/aml/aml_audio_hw.c b/sound/soc/aml/aml_audio_hw.c
+index 5db6a4f..61df10b 100755
+--- a/sound/soc/aml/aml_audio_hw.c
++++ b/sound/soc/aml/aml_audio_hw.c
+@@ -28,22 +28,22 @@ unsigned I2S_MODE      = AIU_I2S_MODE_PCM16;
+ int  audio_in_buf_ready = 0;
+ int audio_out_buf_ready = 0;
+ 
+-unsigned int IEC958_bpf = 0x7dd;
+-unsigned int IEC958_brst = 0xc;
+-unsigned int IEC958_length = 0x7dd*8;
+-unsigned int IEC958_padsize = 0x8000;
+-unsigned int IEC958_mode = 1;
+-unsigned int IEC958_syncword1 = 0x7ffe;
+-unsigned int IEC958_syncword2 = 0x8001;
+-unsigned int IEC958_syncword3 = 0;
+-unsigned int IEC958_syncword1_mask = 0;
+-unsigned int IEC958_syncword2_mask = 0;
+-unsigned int IEC958_syncword3_mask = 0xffff;
+-unsigned int IEC958_chstat0_l = 0x1902 ;
+-unsigned int IEC958_chstat0_r = 0x1902 ;
+-unsigned int IEC958_chstat1_l = 0x200;
+-unsigned int IEC958_chstat1_r = 0x200;
+-unsigned int IEC958_mode_raw = 0;
++unsigned int IEC958_bpf;
++unsigned int IEC958_brst;
++unsigned int IEC958_length;
++unsigned int IEC958_padsize;
++unsigned int IEC958_mode;
++unsigned int IEC958_syncword1;
++unsigned int IEC958_syncword2;
++unsigned int IEC958_syncword3;
++unsigned int IEC958_syncword1_mask;
++unsigned int IEC958_syncword2_mask;
++unsigned int IEC958_syncword3_mask;
++unsigned int IEC958_chstat0_l;
++unsigned int IEC958_chstat0_r;
++unsigned int IEC958_chstat1_l;
++unsigned int IEC958_chstat1_r;
++unsigned int IEC958_mode_raw;
+ /*
+  0 --  other formats except(DD,DD+,DTS)
+  1 --  DTS
+-- 
+1.7.9.5
+

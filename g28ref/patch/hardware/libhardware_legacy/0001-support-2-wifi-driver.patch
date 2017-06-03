@@ -1,0 +1,131 @@
+From f8cb562a234a510a2b67b0531f75fd46f0c3d835 Mon Sep 17 00:00:00 2001
+From: xiajinlin <jinlin.xia@amlogic.com>
+Date: Thu, 16 May 2013 15:38:45 +0800
+Subject: [PATCH] support 2 wifi driver
+
+---
+ wifi/wifi.c |   55 +++++++++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 49 insertions(+), 6 deletions(-)
+
+diff --git a/wifi/wifi.c b/wifi/wifi.c
+index 7e25542..100f38f 100755
+--- a/wifi/wifi.c
++++ b/wifi/wifi.c
+@@ -60,6 +60,9 @@ extern char *dhcp_lasterror();
+ extern void get_dhcp_info();
+ extern int init_module(void *, unsigned long, const char *);
+ extern int delete_module(const char *, unsigned int);
++extern int matchNum;
++extern int usb_wifi_load_driver();
++extern int usb_wifi_unload_driver();
+ 
+ static char primary_iface[PROPERTY_VALUE_MAX];
+ // TODO: use new ANDROID_SOCKET mechanism, once support for multiple
+@@ -107,6 +110,9 @@ static const char SUPP_CONFIG_FILE[]    = "/data/misc/wifi/wpa_supplicant.conf";
+ static const char P2P_CONFIG_FILE[]     = "/data/misc/wifi/p2p_supplicant.conf";
+ static const char CONTROL_IFACE_PATH[]  = "/data/misc/wifi/sockets";
+ static const char MODULE_FILE[]         = "/proc/modules";
++static char wifi_driver_fw_path_sta[1024];
++static char wifi_driver_fw_path_ap[1024];
++static char wifi_driver_fw_path_p2p[1024];
+ 
+ static const char SUPP_ENTROPY_FILE[]   = WIFI_ENTROPY_FILE;
+ static unsigned char dummy_key[21] = { 0x02, 0x11, 0xbe, 0x33, 0x43, 0x35,
+@@ -235,13 +241,23 @@ int wifi_load_driver()
+     do_wifi_workaround();
+ #ifdef WIFI_DRIVER_MODULE_PATH
+     char driver_status[PROPERTY_VALUE_MAX];
++    char machine_id[PROPERTY_VALUE_MAX];
++    char driver_module_path[128];
++    char driver_module_arg[1024];
+     int count = 100; /* wait at most 20 seconds for completion */
+ 
+     if (is_wifi_driver_loaded()) {
+         return 0;
+     }
+-
+-    if (insmod(DRIVER_MODULE_PATH, DRIVER_MODULE_ARG) < 0)
++    property_get("ubootenv.var.letv_persist9", machine_id, NULL);
++    if(!strncasecmp(machine_id, "c1s", 3)) {
++        strcpy(driver_module_path, "/system/lib/dhd.ko");
++        strcpy(driver_module_arg, "firmware_path=/etc/wifi/40181/fw_bcm40181a2.bin nvram_path=/etc/wifi/40181/nvram.txt");
++    } else {
++        strcpy(driver_module_path, DRIVER_MODULE_PATH);
++        strcpy(driver_module_arg, DRIVER_MODULE_ARG);
++    }
++    if (insmod(driver_module_path, driver_module_arg) < 0)
+         return -1;
+ 
+     if (strcmp(FIRMWARE_LOADER,"") == 0) {
+@@ -277,9 +293,18 @@ int wifi_load_driver()
+ 
+ int wifi_unload_driver()
+ {
++    char machine_id[PROPERTY_VALUE_MAX];
++    char driver_module_name[128];
+     usleep(200000); /* allow to finish interface down */
+ #ifdef WIFI_DRIVER_MODULE_PATH
+-    if (rmmod(DRIVER_MODULE_NAME) == 0) {
++    property_get("ubootenv.var.letv_persist9", machine_id, NULL);
++    if(!strncasecmp(machine_id, "c1s", 3)) {
++        strcpy(driver_module_name, "dhd");
++    } else {
++        strcpy(driver_module_name, DRIVER_MODULE_NAME);
++    }
++    
++    if (rmmod(driver_module_name) == 0) {
+         int count = 20; /* wait at most 10 seconds for completion */
+         while (count-- > 0) {
+             if (!is_wifi_driver_loaded())
+@@ -900,13 +925,26 @@ int wifi_command(const char *ifname, const char *command, char *reply, size_t *r
+ 
+ const char *wifi_get_fw_path(int fw_type)
+ {
++    char machine_id[PROPERTY_VALUE_MAX];
++    
++    property_get("ubootenv.var.letv_persist9", machine_id, NULL);
++    if(!strncasecmp(machine_id, "c1s", 3)) {
++        strcpy(wifi_driver_fw_path_sta, "/etc/wifi/40181/fw_bcm40181a2.bin");
++        strcpy(wifi_driver_fw_path_ap, "/etc/wifi/40181/fw_bcm40181a2_apsta.bin");
++        strcpy(wifi_driver_fw_path_p2p, "/etc/wifi/40181/fw_bcm40181a2_p2p.bin");
++    } else {
++        strcpy(wifi_driver_fw_path_sta, WIFI_DRIVER_FW_PATH_STA);
++        strcpy(wifi_driver_fw_path_ap, WIFI_DRIVER_FW_PATH_AP);
++        strcpy(wifi_driver_fw_path_p2p, WIFI_DRIVER_FW_PATH_P2P);
++    }
++    
+     switch (fw_type) {
+     case WIFI_GET_FW_PATH_STA:
+-        return WIFI_DRIVER_FW_PATH_STA;
++        return wifi_driver_fw_path_sta;
+     case WIFI_GET_FW_PATH_AP:
+-        return WIFI_DRIVER_FW_PATH_AP;
++        return wifi_driver_fw_path_ap;
+     case WIFI_GET_FW_PATH_P2P:
+-        return WIFI_DRIVER_FW_PATH_P2P;
++        return wifi_driver_fw_path_p2p;
+     }
+     return NULL;
+ }
+@@ -918,6 +956,10 @@ int wifi_change_fw_path(const char *fwpath)
+     int ret = 0;
+ 
+ #ifndef BOARD_WIFI_REALTEK
++    char machine_id[PROPERTY_VALUE_MAX];
++
++    property_get("ubootenv.var.letv_persist9", machine_id, NULL);
++    if(!strncasecmp(machine_id, "c1s", 3)) {
+     if (!fwpath)
+         return ret;
+     fd = TEMP_FAILURE_RETRY(open(WIFI_DRIVER_FW_PATH_PARAM, O_WRONLY));
+@@ -931,6 +973,7 @@ int wifi_change_fw_path(const char *fwpath)
+         ret = -1;
+     }
+     close(fd);
++    }
+ #endif
+     
+     return ret;
+-- 
+1.7.9.5
+

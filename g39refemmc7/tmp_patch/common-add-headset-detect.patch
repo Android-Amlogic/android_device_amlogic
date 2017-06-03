@@ -1,0 +1,58 @@
+From 571b36ec632933b76a0d361f0239a6dae1d1f067 Mon Sep 17 00:00:00 2001
+From: "ling.fang" <ling.fang@amlogic.com>
+Date: Fri, 3 May 2013 20:35:55 +0800
+Subject: [PATCH] add headset detect
+
+---
+ sound/soc/aml/aml_m6_rt5631.c |   28 ++++++++++++++++++++--------
+ 1 file changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/sound/soc/aml/aml_m6_rt5631.c b/sound/soc/aml/aml_m6_rt5631.c
+index 8ec5381..c21a728 100755
+--- a/sound/soc/aml/aml_m6_rt5631.c
++++ b/sound/soc/aml/aml_m6_rt5631.c
+@@ -26,6 +26,7 @@
+ #include <sound/soc-dapm.h>
+ #include <sound/jack.h>
+ #include <sound/rt5631.h>
++#include <linux/delay.h>
+ 
+ #include <asm/mach-types.h>
+ #include <mach/hardware.h>
+@@ -172,14 +173,25 @@ static void rt5631_work_func(struct work_struct *work)
+ 
+     flag = rt5631_detect_hp();
+     if(pdata->detect_flag != flag) {
+-        if (flag == 1) {
+-            if ((&pdata->sdev!=NULL)&&(pdata->sdev.dev!=NULL))
+-				switch_set_state(&pdata->sdev, 2);  // 1 :have mic  2: no mic
+-            else
+-            	printk(KERN_INFO "rt5631 kernel NULL pointer error\n");
+-            jack_type = rt5631_headset_detect(codec, 1);
+-            printk(KERN_INFO "rt5631 hp pluged jack_type: %d\n", jack_type);
+-            snd_soc_jack_report(&pdata->jack, status, SND_JACK_HEADPHONE);
++        if (flag == 1 || flag == 2) {
++			 snd_soc_update_bits(codec, RT5631_PWR_MANAG_ADD2,
++	            RT5631_PWR_MICBIAS1_VOL | RT5631_PWR_MICBIAS2_VOL,
++	            RT5631_PWR_MICBIAS1_VOL | RT5631_PWR_MICBIAS2_VOL);
++			msleep(100);
++			if(flag == 1){
++				if ((&pdata->sdev!=NULL)&&(pdata->sdev.dev!=NULL))
++					switch_set_state(&pdata->sdev, 2);  // 1 :have mic  2: no mic
++				else
++					printk(KERN_INFO "rt5631 kernel NULL pointer error\n");
++			}else if(flag == 2){
++				if ((&pdata->sdev!=NULL)&&(pdata->sdev.dev!=NULL))
++					switch_set_state(&pdata->sdev, 1);  // 1 :have mic  2: no mic
++				else
++					printk(KERN_INFO "rt5631 kernel NULL pointer error\n");
++			}
++				jack_type = rt5631_headset_detect(codec, 1);
++				printk(KERN_INFO "rt5631 hp pluged jack_type: %d\n", jack_type);
++				snd_soc_jack_report(&pdata->jack, status, SND_JACK_HEADPHONE);
+         } else {
+             printk(KERN_INFO "rt5631 hp unpluged\n");
+             if ((&pdata->sdev!=NULL)&&(pdata->sdev.dev!=NULL))
+-- 
+1.7.9.5
+

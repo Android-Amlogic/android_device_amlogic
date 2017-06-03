@@ -1,0 +1,14 @@
+diff --git a/init/util.c b/init/util.c
+index 446d153..b9ca341 100755
+--- a/init/util.c
++++ b/init/util.c
+@@ -442,7 +442,8 @@ int wait_for_file(const char *filename, int timeout)
+     int ret = -1;
+ 
+     while (gettime() < timeout_time && ((ret = stat(filename, &info)) < 0))
+-        usleep(10000);
++       //usleep(10000);
++        usleep(1000000);
+ 
+     return ret;
+ }

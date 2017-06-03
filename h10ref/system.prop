@@ -1,0 +1,169 @@
+ro.sf.lcd_density=160
+keyguard.no_require_sim=1
+#set keyguard.enable=false to disable keyguard
+keyguard.enable=false
+ro.statusbar.widget=false
+ro.statusbar.button=false
+ro.statusbar.yearmonthdayweek=false
+ro.statusbar.widget.power=false
+
+ro.hardware=amlogic
+
+# preload class
+#ro.amlogic.no.preloadclass=1
+# preload resource
+#ro.amlogic.no.preloadresources=1
+
+#disable strictmode
+persist.sys.strictmode.disable=true
+
+#enable adb in user mode, need to change ro.secure=0 in main.mk
+persist.service.adb.enable=1
+
+#wifi.interface=ra0
+# Time between scans in seconds. Keep it high to minimize battery drain.
+# This only affects the case in which there are remembered access points,
+# but none are in range.
+#wifi.supplicant_scan_interval = 60
+#alsa.mixer.playback.master=DAC2 Analog
+#alsa.mixer.capture.master=Analog
+
+hwui.render_dirty_regions=false
+
+# Configure features
+hw.nopm=false
+hw.nobattery=true
+hw.nophone=true
+hw.novibrate=true
+hw.nobluetooth=true
+hw.nogps=true
+hw.cameras=1
+hw.hasethernet=true
+hw.nodatausage=true  
+hw.nosyncsetting=true
+hw.nolocation=true
+hw.noaccessibility=true
+#hw.noaboutdevice=true  
+hw.nosoundcategoryfeedback=true
+hw.notv=false
+hw.nodtv=false
+hw.has.accelerometer=false
+
+ro.platform.has.security=false
+ro.platform.has.mbxuimode=true
+
+# Wi-Fi sleep policy
+ro.platform.has.sleeppolicy=false
+
+# Set Camera Orientation
+ro.camera.orientation.front=0
+#ro.camera.orientation.back=0
+
+#camera DCIM dir. 0:sd only; 1:nand only; 2,sd first
+ro.camera.dcim=2
+
+# Use OSD2 mouse patch
+ro.ui.cursor=surface
+ro.ui.cursor.autohide=true
+ro.ui.cursor.timeout=10000
+
+# Enable 32-bit OSD
+sys.fb.bits=32
+
+# Enable cold reboot mode
+sys.cold-reboot.enable=true
+
+# hide status bar
+sys.statusbar.forcehide=true
+
+# Disable GPS
+gps.enable=false
+
+# for sata connect to PC
+vold.gadget_only_sata=1
+
+#TV FEATURE
+ro.tv.shortcutkey=true
+tv.globalsetup_show_status=false
+tv.tvstart_status=true
+tv.shortcutkey_show=false
+ro.tv.source_rember=true
+tv.powermanager.nevertimeout=true
+tv.android_no_sourcelist=false
+ro.tv.tvinchannel.av1=4097
+ro.tv.tvinchannel.av2=4098
+ro.tv.tvinchannel.ypbpr1=2048
+tv.powerOffShow=true
+ro.tv.androidvol.mod.enable=true
+ro.tv.android.defvolindex=15
+ro.tv.dtvmode.dvb=true
+
+#new PQ db method
+vpp.new.cm=enable
+vpp.new.nr=enable
+
+
+#Enable player buildin
+media.amsuperplayer.enable=true
+media.amplayer.enable-acodecs=asf,ape,flac,alac
+media.arm.audio.decoder=ape
+media.amplayer.enable=true
+media.amsuperplayer.m4aplayer=STAGEFRIGHT_PLAYER
+media.amsuperplayer.defplayer=PV_PLAYER
+media.amplayer.thumbnail=true
+media.amplayer.startmode=true
+#Enable fake sdcard
+vold.fakesdcard.enable=0
+
+#for usb audio
+snd.card.totle.num=1
+snd.card.0.name=null
+snd.card.1.name=null
+snd.card.2.name=null
+snd.card.3.name=null
+snd.card.4.name=null
+snd.card.5.name=null
+snd.card.6.name=null
+snd.card.7.name=null
+# default use external usb in device if -1
+snd.card.default.card=-1
+alsa.use.usb.audioin=true
+
+######## UBOOTENV VARIBLES - r/w as system properties ##########
+#
+#  Now we can load ubootenv varibles to system properties. 
+#  We use a special prefix ("ubootenv.var" as default) to indicate that the 'property'
+#  actually is an ubootenv varible. 
+#  
+#  A ubootenv 'property' will be initialized during system booting. And when user set
+#  a different value, it will be written back to ubootenv device immediately.
+#
+
+## prefix of ubootenv varibles - should less than 16 chars.
+#UBOOTENV MTD NAME
+ro.mtd.ubootenv=ubootenv
+ro.ubootenv.varible.prefix=ubootenv.var
+ubootenv.var.bootcmd=
+ubootenv.var.cpuclock=
+ubootenv.var.gpuclock=
+ubootenv.var.memsize=
+ubootenv.var.ethaddr=
+ubootenv.var.ipaddr=
+ubootenv.var.gatewayip=
+ubootenv.var.suspend=
+ubootenv.var.ubootversion=
+ubootenv.var.usbboot=
+#disable panel rotate
+ubootenv.var.has.accelerometer=false
+
+#modify the default timezone
+persist.sys.timezone=Asia/Shanghai
+
+#set ethernet on defaultly
+ro.ethernet.default_on=true
+
+#set 3d alternative
+ALTERNATIV.3D.SUPPORT = enable
+
+#never timeout
+mbx.timeout.enable=false

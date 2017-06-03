@@ -1,0 +1,30 @@
+diff --git a/drivers/amlogic/power/axp_power/axp20-sply.c b/drivers/amlogic/power/axp_power/axp20-sply.c
+index 5a91291..b81ea60 100755
+--- a/drivers/amlogic/power/axp_power/axp20-sply.c
++++ b/drivers/amlogic/power/axp_power/axp20-sply.c
+@@ -437,7 +437,7 @@ EXPORT_SYMBOL_GPL(axp_reg_reads);
+ int axp_reg_write(uint8_t addr, uint8_t val)
+ {
+     CHECK_DRIVER();
+-    return axp_read(gcharger->master, addr, val);
++    return axp_write(gcharger->master, addr, val);
+ }
+ EXPORT_SYMBOL_GPL(axp_reg_write);
+ 
+@@ -1842,7 +1842,15 @@ static extern_led_ctrl = 0;
+ static int axp20_suspend(struct platform_device *dev, pm_message_t state)
+ {
+     uint8_t irq_w[9];
+-    uint8_t tmp;
++    uint8_t tmp, val_tmp;
++
++		//add this for ensurce reopen chang reg 33 bit 7 
++		axp_reg_read(0x33, &val_tmp);
++  	//printk("old_val_tmp = %d\n",val_tmp);
++  	val_tmp |= 0x80;
++  	//printk("new_val_tmp = %d\n",val_tmp);     		
++  	axp_reg_write(0x33, val_tmp); 
++  	//end  ensurce reopen chang reg 33 bit 7
+ 
+     struct axp_charger *charger = platform_get_drvdata(dev);
+ 	cancel_delayed_work_sync(&charger->work);

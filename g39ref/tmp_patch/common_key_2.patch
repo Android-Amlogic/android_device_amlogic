@@ -1,0 +1,384 @@
+commit 2bc744b2860a846b8e31edd2d5914ba9a8d6980e
+Author: benlong.zhou <benlong.zhou@amlogic.com>
+Date:   Sun Apr 28 16:41:53 2013 +0800
+
+     security key: add 2 function for reading/writing key
+      1  complete 3 function extenal_api_key_set_version, extenal_api_key_write, extenal_api_key_read
+      2  the 3 functiion can be called in kernel driver
+      3  the external_api_key_set_version is called before extenal_api_key_write/read is called
+      4  a key data size is 4k byte, a key context is hex ASCII('0'~'f'),if a key context is not hex
+          ASCII, it must be translate to hex ASCII, then a key data max size is 8k byte(4k*2)
+      5  emmc key save in tail of emmc
+      6  key area is 256kbyte(128kbyte*2) in emmc
+      7  emmc key config:  Device Drivers  --->
+                                Amlogic Device Drivers  --->
+                                     Amlogic Card support  --->
+                                        [*]     Meson key data store in emmc device support
+
+diff --git a/drivers/amlogic/cardreader/card_block.c b/drivers/amlogic/cardreader/card_block.c
+index a02cf8d..da59d8b 100755
+--- a/drivers/amlogic/cardreader/card_block.c
++++ b/drivers/amlogic/cardreader/card_block.c
+@@ -28,6 +28,10 @@
+ 
+ #include "card_data.h"
+ 
++#ifdef CONFIG_AML_EMMC_KEY
++#include "emmc_key.h"
++#endif
++
+ static int major;
+ #define CARD_SHIFT	4
+ #define CARD_QUEUE_EXIT		(1 << 0)
+@@ -939,6 +943,9 @@ int card_init_inand_lp(struct memory_card* card)
+       struct mtd_partition * part = pinfo->partitions;
+       int i, err=0, nr_part = pinfo->nr_partitions;
+       uint64_t offset=0, size, cur_offset=0;
++#ifdef CONFIG_AML_EMMC_KEY
++      uint64_t key_size;
++#endif
+ 
+       for(i=0; i<nr_part; i++)
+       {
+@@ -952,8 +959,13 @@ int card_init_inand_lp(struct memory_card* card)
+                         size = card->capacity- cur_offset;
+                   else
+                         size = card->capacity - part[i].offset;
++#ifdef CONFIG_AML_EMMC_KEY
++                  key_size = EMMCKEY_AREA_PHY_SIZE;
++                  size -= (key_size>>9);
++#endif
+                   printk("[%s] (sectors) capacity %d, offset %lld, size%lld\n",
+                                     card->name, card->capacity, offset, size);
++
+                   err = add_last_partition(card, cur_offset, size);
+             }
+             else{
+@@ -1001,6 +1013,9 @@ int add_card_partition(struct memory_card* card, struct gendisk * disk,
+ 	uint64_t cur_offset=0;
+ 	uint64_t offset, size;
+ 	
++#ifdef CONFIG_AML_EMMC_KEY
++	uint64_t key_size;
++#endif
+ 	if(!part)
+ 		return 0;
+ 
+@@ -1012,6 +1027,11 @@ int add_card_partition(struct memory_card* card, struct gendisk * disk,
+ 		if (part[i].size == MTDPART_SIZ_FULL)
+ 		{
+ 			size = disk->part0.nr_sects - offset;
++#ifdef CONFIG_AML_EMMC_KEY
++			key_size = EMMCKEY_AREA_PHY_SIZE;
++			size -= (key_size>>9);
++#endif
++
+ #ifdef CONFIG_INAND_LP
+ 			printk("[%s%d] %20s  offset 0x%012llx, len 0x%012llx %s\n",
+ 					disk->disk_name, 1+i, part[i].name, offset<<9, size<<9,
+diff --git a/drivers/amlogic/cardreader/emmc_key.c b/drivers/amlogic/cardreader/emmc_key.c
+index c978806..e62b9a0 100644
+--- a/drivers/amlogic/cardreader/emmc_key.c
++++ b/drivers/amlogic/cardreader/emmc_key.c
+@@ -492,8 +492,8 @@ int emmc_key_init( void *keypara)
+ {
+ 	int i;
+ 	u64  addr=0;
+-	u32  size=0;
+-	u32  lba_start=0,lba_end=0,blk_len=0;
++	u32  size=0,blk_len=0;
++	u64  lba_start=0,lba_end=0;
+ 	int err = 0;
+ #if defined(EMMC_KEY_KERNEL) //kernel
+ 	struct memory_card *card = (struct memory_card*)keypara;
+@@ -512,6 +512,7 @@ int emmc_key_init( void *keypara)
+ 	card->aml_emmckey_info = emmckey_info;
+ 
+ #if defined(EMMC_KEY_KERNEL) 
++	#if 0
+ 		if(card->card_plat_info->nr_partitions>0)
+ 		{
+ 			struct mtd_partition    *partitions_start=NULL,*partitions_end=NULL;
+@@ -553,20 +554,32 @@ int emmc_key_init( void *keypara)
+ 			lba_end = lba_start + (size >> card_data->block_bits) + 1;
+ 			emmckey_info->key_init = 1;
+ 			card->key_protect = 1;
++			printk("%s:%d,card->capacity:%d,\n",__func__,__LINE__,card->capacity);
+ 			printk("%s:%d emmc key lba_start:0x%x,lba_end:0x%x \n",__func__,__LINE__,lba_start,lba_end);
+ 			//printk("%s:%d,host->max_blk_size:%d,host->max_blk_count:%d,block_bits:%d\n",
+ 			//	__func__,__LINE__,card->host->max_blk_size,card->host->max_blk_count,card_data->block_bits);
+ 
+ 		}
++	#else
++		size = EMMCKEY_AREA_PHY_SIZE;
++		addr = card->capacity - (size >> card_data->block_bits); //card->capacity is block number
++		addr <<= card_data->block_bits;
++		lba_start = card->capacity - (size >> card_data->block_bits); 
++		lba_end = card->capacity;
++		emmckey_info->key_init = 1;
++		card->key_protect = 1;
++		//printk("%s:%d,card->capacity:%d,\n",__func__,__LINE__,card->capacity);
++		printk("%s:%d emmc key lba_start:0x%llx,lba_end:0x%llx \n",__func__,__LINE__,lba_start,lba_end);
++	#endif
+ #elif defined(EMMC_KEY_UBOOT)
+-	addr = EMMCKEY_AREA_PHY_START_ADDR;
+ 	size = EMMCKEY_AREA_PHY_SIZE;
++	addr = (card->capacity - size);
+ 	blk_len = card->write_bl_len;
+ 	lba_start = addr >> uint_to_shift(card->write_bl_len);
+-	lba_end = lba_start + (size >> uint_to_shift(card->write_bl_len)) + 1;
++	lba_end = card->capacity >> uint_to_shift(card->write_bl_len);
+ 	emmckey_info->key_init = 1;
+ 	card->key_protect = 1;
+-	printk("%s:%d emmc key lba_start:0x%x,lba_end:0x%x \n",__func__,__LINE__,lba_start,lba_end);
++	printk("%s:%d emmc key lba_start:0x%llx,lba_end:0x%llx \n",__func__,__LINE__,lba_start,lba_end);
+ #endif
+ 	if(!emmckey_info->key_init){
+ 		printk("%s:%d,emmc key init fail\n",__func__,__LINE__);
+diff --git a/drivers/amlogic/cardreader/emmc_key.h b/drivers/amlogic/cardreader/emmc_key.h
+index e2a89dc..aac8ce5 100644
+--- a/drivers/amlogic/cardreader/emmc_key.h
++++ b/drivers/amlogic/cardreader/emmc_key.h
+@@ -12,23 +12,23 @@
+ #define EMMC_KEY_AREA_SIGNAL		"emmckeys"
+ #define EMMC_KEY_AREA_SIGNAL_LEN	16
+ 
+-#define EMMC_KEYAREA_SIZE		(64*1024)
++#define EMMC_KEYAREA_SIZE		(128*1024)
+ #define EMMC_KEYAREA_COUNT		2
+ 
+ #if defined(EMMC_KEY_KERNEL)
+-#define KEY_PREVIOUS_PARTITION 	"boot_env"
+-#define KEY_LATER_PARTITION		"logo"
++//#define KEY_PREVIOUS_PARTITION 	"boot_env"
++//#define KEY_LATER_PARTITION		"logo"
+ #endif
+ #ifdef EMMC_KEY_UBOOT
+ //#define EMMCKEY_AREA_PHY_START_ADDR    (0x60000+0x2000)
+ //#define EMMCKEY_AREA_PHY_SIZE          (128*1024)
+-#define EMMCKEY_AREA_PHY_START_ADDR    (CONFIG_ENV_OFFSET+CONFIG_ENV_SIZE)
+-#define EMMCKEY_AREA_PHY_SIZE          (128*1024)
++//#define EMMCKEY_AREA_PHY_START_ADDR    (CONFIG_ENV_OFFSET+CONFIG_ENV_SIZE)
+ #endif
++#define EMMCKEY_AREA_PHY_SIZE          (EMMC_KEYAREA_COUNT * EMMC_KEYAREA_SIZE)
+ 
+ struct emmckey_valid_node_t {
+ 	u64 phy_addr;
+-	u32 phy_size;
++	u64 phy_size;
+ 	struct emmckey_valid_node_t *next;
+ };
+ 
+@@ -36,9 +36,9 @@ struct aml_emmckey_info_t {
+ 	//struct memory_card *card;
+ 	struct emmckey_valid_node_t *key_valid_node;
+ 	u64    keyarea_phy_addr;
+-	u32    keyarea_phy_size;
+-	u32    lba_start;
+-	u32    lba_end;
++	u64    keyarea_phy_size;
++	u64    lba_start;
++	u64    lba_end;
+ 	u32    blk_size;
+ 	u32    blk_shift;
+ 	u8     key_init;
+diff --git a/drivers/amlogic/cardreader/sd/sd.c b/drivers/amlogic/cardreader/sd/sd.c
+index 8dc0eb8a..dde9976 100755
+--- a/drivers/amlogic/cardreader/sd/sd.c
++++ b/drivers/amlogic/cardreader/sd/sd.c
+@@ -158,7 +158,7 @@ static int sd_request(struct memory_card *card, struct card_blk_request *brq)
+ #ifdef CONFIG_AML_EMMC_KEY
+ 	if(card->key_protect){
+ 		if(card->aml_emmckey_info){
+-			if((lba > card->aml_emmckey_info->lba_start ) &&( lba < card->aml_emmckey_info->lba_end)){
++			if((lba >= card->aml_emmckey_info->lba_start ) &&( lba < card->aml_emmckey_info->lba_end)){
+ 				//printk("%s:%d,area read/write protect\n",__func__,__LINE__);
+ 				return 0;
+ 			}
+diff --git a/drivers/amlogic/efuse/keys/aml_keys.h b/drivers/amlogic/efuse/keys/aml_keys.h
+index 822dad2..7702332 100644
+--- a/drivers/amlogic/efuse/keys/aml_keys.h
++++ b/drivers/amlogic/efuse/keys/aml_keys.h
+@@ -13,6 +13,7 @@
+  */
+ #define CONFIG_MAX_STORAGE_KEYSIZE 4096 //4k
+ #define CONFIG_MAX_VALID_KEYSIZE    (CONFIG_MAX_STORAGE_KEYSIZE)
++#define KEYBUF_MAX_LEN	(CONFIG_MAX_STORAGE_KEYSIZE*2)
+ typedef struct aml_key_s aml_key_t;
+ #define AML_KEY_NAMELEN  16
+ struct aml_key_s{
+diff --git a/drivers/amlogic/efuse/keys/core.c b/drivers/amlogic/efuse/keys/core.c
+index aa40f6f..3f97c14 100755
+--- a/drivers/amlogic/efuse/keys/core.c
++++ b/drivers/amlogic/efuse/keys/core.c
+@@ -1203,6 +1203,10 @@ static ssize_t key_write_store(struct device *dev, struct device_attribute *attr
+                              const char *buf, size_t count)
+ {
+ 	int err;
++	if(curkey == NULL){
++		printk("unkown current key-name,%s:%d\n",__func__,__LINE__);
++		return -EINVAL;
++	}
+ 	if((security_key_name[0] != 0) &&(curkey->name[0] == 0))
+ 	{
+ 		strcpy(curkey->name,security_key_name);
+@@ -1256,6 +1260,18 @@ char twoASCByteToByte(char c1, char c2)
+ 	cha = ((cha<<4)|(c2&0x0f));
+ 	return cha;
+ }
++static char hexToAscII(char c)
++{
++	char cha;
++	cha = c & 0x0f;
++	if((cha>=0)&&(cha<=9)){
++		cha += '0';
++	}
++	else if((cha>=0xa) && (cha <= 0xf)){
++		cha = cha - 0xa + 'a';
++	}
++	return cha;
++}
+ 
+ static ssize_t key_usid_show(struct device *dev, struct device_attribute *attr,
+                             char *buf)
+@@ -1326,6 +1342,7 @@ static struct key_new_node key_node_name[]={
+ 		.name = USID_KEY_NAME,
+ 	},
+ };
++
+ static ssize_t key_node_set(struct device *dev)
+ {
+ 	int ret,i;
+@@ -1541,6 +1558,7 @@ char asc_to_i(char para)
+ }
+ 
+ #define MAX_BUF_LEN 2048
++//#define MAX_BUF_LEN KEYBUF_MAX_LEN
+ int get_aml_key_kernel(const char* key_name, unsigned char* data, int ascii_flag)
+ {
+ 	int ret;
+@@ -1805,25 +1823,65 @@ int extenal_api_key_set_version(char *devvesion)
+ }
+ EXPORT_SYMBOL(extenal_api_key_set_version);
+ 
+-int extenal_api_key_write(char *keyname,char *keydata)
++int extenal_api_key_write(char *keyname,char *keydata,int dsize,int hexascii_flag)
+ {
+-	/*
+ 	ssize_t ret=0;
+-	struct device_attribute attr;
++	int i,j;
++	int count;
++	char* buf = NULL;
++	//struct device_attribute attr;
+ 	if(strlen(keyname) >= AML_KEY_NAMELEN){
+ 		printk("keyname too lenth,%s:%d\n",__func__,__LINE__);
+ 		return -EINVAL;
+ 	}
+-	ret = key_name_store(key_device);
+-	*/
+-	return -EINVAL;
++	if(keys_version != version_check()){
++		printk("don't set version,please set version,%s:%d\n",__func__,__LINE__);
++		return -EINVAL;
++	}
++	if(key_device == NULL){
++		printk("sysfs don't init success,%s:%d\n",__func__,__LINE__);
++		return -EINVAL;
++	}
++	
++	buf = kmalloc(KEYBUF_MAX_LEN, GFP_KERNEL);
++	if(!buf){
++		printk("no memory\n");
++		return -1;
++	}
++	memset(buf, 0, KEYBUF_MAX_LEN);
++	ret = key_name_store(NULL,NULL,keyname,strlen(keyname));
++	if(ret < 0){
++		printk("save keyname:%s,fail,%s:%d\n",keyname,__func__,__LINE__);
++		kfree(buf);
++		return -EINVAL;
++	}
++	if(hexascii_flag == 0){
++		count = dsize;
++		for(i=0,j=0;i<count;i++){
++			buf[j] = hexToAscII((keydata[i]>>4)&0xf);
++			buf[j+1] = hexToAscII(keydata[i]&0xf);
++			j+=2;
++		}
++		count = j;
++	}
++	else{
++		count = dsize;
++		strncpy(buf,keydata,count);
++	}
++
++	ret = key_write_store(NULL,NULL,buf,count);
++	kfree(buf);
++	return ret;
+ }
+-int extenal_api_key_read(char *keyname,char *keydata)
++EXPORT_SYMBOL(extenal_api_key_write);
++int extenal_api_key_read(char *keyname,char *keydata,int hexascii_flag)
+ {
+-	aml_key_t * keys;
+-	struct device_attribute attr;
++	//aml_key_t * keys;
++	//struct device_attribute attr;
+ 	ssize_t ret=0;
+-	int i;
++	int i,j;
++	int count;
++	char* buf = NULL;
+ 	if(strlen(keyname) >= AML_KEY_NAMELEN){
+ 		printk("keyname too lenth,%s:%d\n",__func__,__LINE__);
+ 		return -EINVAL;
+@@ -1836,6 +1894,7 @@ int extenal_api_key_read(char *keyname,char *keydata)
+ 		printk("sysfs don't init success,%s:%d\n",__func__,__LINE__);
+ 		return -EINVAL;
+ 	}
++#if 0
+ 	keys = key_schematic[keys_version]->keys;
+ 	curkey = NULL;
+ 	security_key_name[0]=0;
+@@ -1850,10 +1909,38 @@ int extenal_api_key_read(char *keyname,char *keydata)
+ 		printk("don't found keyname,%s:%d\n",__func__,__LINE__);
+ 		return -EINVAL;
+ 	}
+-	ret = key_read_show(key_device, &attr,keydata);
++#endif
++	buf = kmalloc(KEYBUF_MAX_LEN, GFP_KERNEL);
++	if(!buf){
++		printk("no memory\n");
++		return -1;
++	}
++	memset(buf, 0, KEYBUF_MAX_LEN);
++	ret = key_name_store(NULL, NULL, keyname, strlen(keyname));
++	if(ret < 0){
++		printk("don't found keyname:%s,%s:%d\n",keyname,__func__,__LINE__);
++		kfree(buf);
++		return -EINVAL;
++	}
++	ret = key_read_show(NULL, NULL,buf);
++	if(ret > 0){
++		if(hexascii_flag == 0){
++			count = ret;
++			for(i=0,j=0;i<count;j++){
++				keydata[j] = twoASCByteToByte(buf[i],buf[i+1]);
++				i += 2;
++			}
++			ret = j;
++		}
++		else{
++			strncpy(keydata,buf,ret);
++		}
++	}
++	kfree(buf);
++	buf = NULL;
+ 	return ret;
+ }
+-
++EXPORT_SYMBOL(extenal_api_key_read);
+ 
+ static int __init aml_keys_init(void)
+ {
