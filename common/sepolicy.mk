@@ -7,9 +7,6 @@ BOARD_SEPOLICY_DIRS := \
     device/amlogic/common/sepolicy_cts
 endif
 
-BOARD_SEPOLICY_REPLACE := \
-    domain.te
-
 BOARD_SEPOLICY_UNION := \
     device.te \
     file.te \
