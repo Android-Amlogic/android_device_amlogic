@@ -15,9 +15,9 @@ $(INSTALLED_KERNEL_TARGET): $(TARGET_PREBUILT_KERNEL) | $(ACP)
 
 else
 ifeq ($(SUPPORT_HDMIIN),true)
-KERNEL_DEVICETREE := meson8m2_n200C_1G_hdmiin meson8m2_n200C_2G_hdmiin meson8_k200b_1G_emmc_sdio_hdmiin meson8_k200b_1G_emmc_sdhc_hdmiin meson8_k200b_2G_emmc_sdhc_hdmiin meson8_k200b_2G_emmc_sdio_hdmiin
+KERNEL_DEVICETREE := meson8m2_n200C_1G_hdmiin meson8m2_n200C_2G_hdmiin meson8_k200b_1G_emmc_sdio_hdmiin meson8_k200b_1G_emmc_sdhc_hdmiin meson8_k200b_2G_emmc_sdhc_hdmiin meson8_k200b_2G_emmc_sdio_hdmiin m8m2_bcm4335_n200C_1G
 else
-KERNEL_DEVICETREE := meson8m2_n200C_1G meson8m2_n200C_2G
+KERNEL_DEVICETREE := meson8m2_n200C_1G meson8m2_n200C_2G m8m2_bcm4335_n200C_1G
 endif
 
 ifeq ($(TARGET_USE_SECUREOS),true)

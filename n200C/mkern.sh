@@ -30,7 +30,7 @@ fi
 if [ "$2" != "m" ]; then
     common/mkbootimg --kernel common/../$KERNEL_OUT/arch/arm/boot/uImage \
         --ramdisk ${ROOTFS} \
-        --second common/../$KERNEL_OUT/arch/arm/boot/dts/amlogic/meson8m2_n200C_1G.dtb \
+        --second common/../$KERNEL_OUT/arch/arm/boot/dts/amlogic/m8m2_bcm4335_n200C_1G.dtb \
         --output ./boot.img
     ls -l ./boot.img
     echo "boot.img done"
