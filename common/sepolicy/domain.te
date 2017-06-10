@@ -171,7 +171,7 @@ neverallow { domain  -recovery } unlabeled:dir_file_class_set create;
 
 # Limit ability to ptrace or read sensitive /proc/pid files of processes
 # with other UIDs to these whitelisted domains.
-neverallow { domain -debuggerd -vold -dumpstate -system_server -instaboot } self:capability sys_ptrace;
+neverallow { domain -debuggerd -vold -dumpstate -system_server  } self:capability sys_ptrace;
 
 # Limit device node creation to these whitelisted domains.
 neverallow { domain -kernel -init -recovery -ueventd -watchdogd -healthd -vold -uncrypt -zygote_proxy } self:capability mknod;
@@ -250,7 +250,7 @@ neverallow domain init:binder call;
 
 # Don't allow raw read/write/open access to block_device
 # Rather force a relabel to a more specific type
-neverallow { domain -kernel -init -recovery -vold -vold_ext -uncrypt -install_recovery -instaboot -tvserver } block_device:blk_file { open read write };
+neverallow { domain -kernel -init -recovery -vold -vold_ext -uncrypt -install_recovery  -tvserver } block_device:blk_file { open read write };
 
 # Don't allow raw read/write/open access to generic devices.
 # Rather force a relabel to a more specific type.
@@ -260,7 +260,7 @@ neverallow { domain  -ueventd -zygote_proxy } device:chr_file { open read write 
 # Limit what domains can mount filesystems or change their mount flags.
 # sdcard_type / vfat is exempt as a larger set of domains need
 # this capability, including device-specific domains.
-neverallow { domain -kernel -init -recovery -vold -vold_ext -zygote -instaboot } { fs_type -sdcard_type }:filesystem { mount remount relabelfrom relabelto };
+neverallow { domain -kernel -init -recovery -vold -vold_ext -zygote  } { fs_type -sdcard_type }:filesystem { mount remount relabelfrom relabelto };
 
 #
 # Assert that, to the extent possible, we're not loading executable content from
