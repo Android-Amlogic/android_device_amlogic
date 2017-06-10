@@ -29,7 +29,6 @@ domain_auto_trans(init, tvcp_exec, tvcp)
 
 allow init vfat:dir rw_dir_perms;
 allow init vfat:file create_file_perms;
-allow init init_shell:process { signull signal };
 
 allow init init:tcp_socket create_stream_socket_perms;
 allow init port:tcp_socket name_bind;
