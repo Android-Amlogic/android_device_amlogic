@@ -36,7 +36,6 @@ allow system_control media_prop:property_service set;
 
 # ctl interface
 allow system_control ctl_default_prop:property_service set;
-allow system_control ctl_dhcp_pan_prop:property_service set;
 allow system_control ctl_bugreport_prop:property_service set;
 
 allow system_control block_device:dir r_dir_perms;
