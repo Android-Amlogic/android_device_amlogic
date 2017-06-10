@@ -1,5 +1,6 @@
 # Point to Point Protocol daemon
-type ppp_system_file, file_type;
+type ppp_system_file, exec_type, file_type;
+type ppp_data_file, file_type;
 
 allow ppp mtp:socket rw_socket_perms;
 allow ppp mtp:unix_dgram_socket rw_socket_perms;
@@ -9,5 +10,7 @@ allow ppp system_file:file rx_file_perms;
 allow ppp vpn_data_file:dir w_dir_perms;
 allow ppp vpn_data_file:file create_file_perms;
 allow ppp mtp:fd use;
-allow ppp ppp_system_file:dir { write search setattr create add_name mounton create_dir_perms };
-allow ppp ppp_system_file:file create_file_perms;
+allow ppp dhcp_prop:property_service set;
+allow ppp ppp_data_file:dir { write search setattr create add_name mounton create_dir_perms };
+allow ppp ppp_system_file:dir { search };
+allow ppp ppp_system_file:file { getattr execute read open execute_no_trans };

@@ -1,0 +1,15 @@
+type make_ext4fs, domain;
+type make_ext4fs_exec, exec_type, file_type;
+init_daemon_domain(make_ext4fs)
+
+allow make_ext4fs devpts:chr_file { read write getattr ioctl };
+allow make_ext4fs devpts:dir { search };
+
+allow make_ext4fs block_device:dir { search getattr };
+allow make_ext4fs swap_block_device:blk_file rw_file_perms;
+
+# Allow stdin/out back to vold
+allow make_ext4fs vold:fd use;
+allow make_ext4fs vold:fifo_file { read write getattr };
+
+allow make_ext4fs dm_device:blk_file create_file_perms;
